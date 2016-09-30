@@ -1,0 +1,35 @@
+server {
+        listen 80;
+        listen 443 ssl;
+        server_name <%= @server_name %>;
+
+        access_log   /var/log/nginx/<%= @server_name %>.access.log;
+        error_log    /var/log/nginx/<%= @server_name %>.error.log;
+
+        root <%= @docroot %>;
+        index index.php;
+
+        location / {
+                try_files $uri $uri/ /index.php?$args;
+                set $redirect_to_ssl "no";
+                if ($ssl_protocol = "") {
+                        set $redirect_to_ssl "yes";
+                }
+                if ($redirect_to_ssl = yes) {
+                        rewrite ^(.*) https://$host$1 permanent;
+                }
+        }
+
+        location ~ \.php$ {
+                try_files $uri =404;
+                include fastcgi_params;
+                fastcgi_pass 127.0.0.1:9002;
+                fastcgi_param  SCRIPT_FILENAME  <%= @docroot %>$fastcgi_script_name;
+                # Remove the HTTP_PROXY parameter, protect from the HTTPoxy vulnerability
+                # https://www.nginx.com/blog/mitigating-the-httpoxy-vulnerability-with-nginx/
+                fastcgi_param HTTP_PROXY "";
+        }
+
+        ssl_certificate <%= @ssl_cert %>;
+        ssl_certificate_key <%= @ssl_key %>;
+}

@@ -1,0 +1,59 @@
+# encoding: utf-8
+
+#
+# Default
+#
+# $ backup perform -t default -c <%= node["backup"]["dir"] %>
+#
+
+RemoteStorageBackup.new(:default, 'default backup') do
+
+<%- if node["backup"]["mysql"] -%>
+<%- node["backup"]["mysql"]["databases"].each do |db_name| -%>
+  database MySQL, :"<%= db_name.to_sym %>" do |db|
+    db.name = "<%= db_name %>"
+  end
+<%- end -%>
+<%- end -%>
+
+<%- if node["mongodb"] -%>
+<%- node["backup"]["mongodb"]["databases"].each do |db_name| -%>
+  database MongoDB, :"<%= db_name.to_sym %>" do |db|
+    db.name = "<%= db_name %>"
+  end
+<%- end -%>
+<%- end -%>
+
+<%- node["backup"]["redis"]["databases"].each do |db_name| -%>
+  database Redis, :"<%= db_name.to_sym %>" do |db|
+    db.rdb_path = "/var/lib/redis/<%= db_name %>.rdb"
+  end
+<%- end -%>
+
+<% if node["backup"]["archives"].length > 0 %>
+<% node["backup"]["archives"].each do |key, items| %>
+  archive :<%= key %>  do |archive|
+    <% items.each do |item| %>
+    Dir['<%= item %>'].each do |dir|
+      archive.add(dir)
+    end
+    <% end %>
+    archive.tar_options '-h --ignore-failed-read'
+  end
+<% end %>
+<% end %>
+
+store_with S3 do |s3|
+  s3.path    = "/<%= node["hostname"] %>"
+  s3.keep    = <%= node['backup']['s3']['keep'] %>
+end
+
+compress_with Bzip2
+
+encrypt_with OpenSSL
+
+notify_by Mail do |mail|
+  mail.on_success = false
+end
+
+end

@@ -1,0 +1,9 @@
+{
+  "id": "kare",
+  "ssh_keys": [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCw0I82gT8R4tpsqWGovLyjm2SR2F863MqNz224h3h/wl0xA5Eu0eRro+ELLv2hoebqQbcMsb89X5+7ObhDRar+b7tzDlXq4x+ECkAy6WbDSmBp3kNVd7muT4c9Zw7UxKsIvIm1ven1TkJ3UG80o6PyGiAUlBj4puIQwhp7OVknVutBBe8Rpp4f6BEuWluwpnPxc3KSaGhhr9p10xeX69cfspH40r8vHpI0zp19O5GpfYSOEH64UbwRpN2QypNB8ISmDHFsNGwdz0Ba4qrEOSGU9GveyOcsvEtt630/0fHqtbPBovOYu/FJISQZya2tofDig4EngBCJNfsPCbXFHtlp greg@karekinian.com"
+  ],
+  "groups": ["sysadmin"],
+  "uid": 2001,
+  "shell": "\/bin\/bash"
+}

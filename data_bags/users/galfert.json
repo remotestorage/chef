@@ -1,0 +1,9 @@
+{
+  "id": "galfert",
+  "ssh_keys": [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAzxZ8uVOc30yK1wZAs/qicumvN1p8xswyxQcBE3qgQdzP63w0i+osk12THuYSY8mymAUFiTVRaxLet6CbRDBql0S6mYKwWZZZmGJ27xpIxBuzzsx4E527CRn5N68MbDRU37sp5ZrZ/RhSaoaOp8yOWEXs+vFKZbOp2CsKZFRiTV8VB9KOqgvgV2Zk2ocTb+vziNyag4DQtkipxJ/5G+fOTpcRjzFYvWKz0IGjKOmboGnshjbC1A46s/EFCJ1QQ5HqeI8R2tbGpR2YV1k9wJXWxzxcvF1xNSAwXxjTJ4nIC/G2yYkZO/jHXjsBeC5oBwqd15haR2/aM3jXeG9YurURnw== gba@FUCKUP"
+  ],
+  "groups": ["sysadmin"],
+  "uid": 2004,
+  "shell": "\/bin\/bash"
+}

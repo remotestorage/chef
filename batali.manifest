@@ -1,0 +1,753 @@
+{
+  "infrastructure": false,
+  "cookbook": [
+    {
+      "name": "mediawiki",
+      "dependencies": [
+        [
+          "apache2",
+          "> 0"
+        ],
+        [
+          "php",
+          "> 0"
+        ],
+        [
+          "mysql",
+          "> 0"
+        ],
+        [
+          "database",
+          "> 0"
+        ],
+        [
+          "nginx",
+          "> 0"
+        ],
+        [
+          "mysql2_chef_gem",
+          "> 0"
+        ],
+        [
+          "php-fpm",
+          "> 0"
+        ]
+      ],
+      "version": "0.2.0",
+      "source": {
+        "url": "https://github.com/67P/mediawiki-cookbook.git",
+        "ref": "b76104ab975ed95e238c10ae49722f0dacd7c0b2",
+        "type": "Batali::Source::Git",
+        "subdirectory": null
+      }
+    },
+    {
+      "name": "apache2",
+      "dependencies": [
+
+      ],
+      "version": "3.1.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/apache2/versions/3.1.0/download",
+        "version": "3.1.0"
+      }
+    },
+    {
+      "name": "php",
+      "dependencies": [
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "xml",
+          ">= 0.0.0"
+        ],
+        [
+          "mysql",
+          ">= 6.0.0"
+        ],
+        [
+          "yum-epel",
+          ">= 0.0.0"
+        ],
+        [
+          "windows",
+          ">= 0.0.0"
+        ],
+        [
+          "iis",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "1.7.2",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/php/versions/1.7.2/download",
+        "version": "1.7.2"
+      }
+    },
+    {
+      "name": "build-essential",
+      "dependencies": [
+
+      ],
+      "version": "2.2.4",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/build-essential/versions/2.2.4/download",
+        "version": "2.2.4"
+      }
+    },
+    {
+      "name": "xml",
+      "dependencies": [
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "chef-sugar",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "2.0.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/xml/versions/2.0.0/download",
+        "version": "2.0.0"
+      }
+    },
+    {
+      "name": "chef-sugar",
+      "dependencies": [
+
+      ],
+      "version": "3.3.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/chef-sugar/versions/3.3.0/download",
+        "version": "3.3.0"
+      }
+    },
+    {
+      "name": "mysql",
+      "dependencies": [
+        [
+          "yum-mysql-community",
+          ">= 0.0.0"
+        ],
+        [
+          "smf",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "7.2.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/mysql/versions/7.2.0/download",
+        "version": "7.2.0"
+      }
+    },
+    {
+      "name": "yum-mysql-community",
+      "dependencies": [
+        [
+          "yum",
+          ">= 3.2"
+        ]
+      ],
+      "version": "0.1.21",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/yum-mysql-community/versions/0.1.21/download",
+        "version": "0.1.21"
+      }
+    },
+    {
+      "name": "yum",
+      "dependencies": [
+
+      ],
+      "version": "3.10.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/yum/versions/3.10.0/download",
+        "version": "3.10.0"
+      }
+    },
+    {
+      "name": "smf",
+      "dependencies": [
+        [
+          "rbac",
+          ">= 1.0.1"
+        ]
+      ],
+      "version": "2.2.8",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/smf/versions/2.2.8/download",
+        "version": "2.2.8"
+      }
+    },
+    {
+      "name": "rbac",
+      "dependencies": [
+
+      ],
+      "version": "1.0.3",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/rbac/versions/1.0.3/download",
+        "version": "1.0.3"
+      }
+    },
+    {
+      "name": "yum-epel",
+      "dependencies": [
+        [
+          "yum",
+          "~> 3.2"
+        ]
+      ],
+      "version": "0.6.5",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/yum-epel/versions/0.6.5/download",
+        "version": "0.6.5"
+      }
+    },
+    {
+      "name": "windows",
+      "dependencies": [
+        [
+          "chef_handler",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "1.38.4",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/windows/versions/1.38.4/download",
+        "version": "1.38.4"
+      }
+    },
+    {
+      "name": "chef_handler",
+      "dependencies": [
+
+      ],
+      "version": "1.3.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/chef_handler/versions/1.3.0/download",
+        "version": "1.3.0"
+      }
+    },
+    {
+      "name": "iis",
+      "dependencies": [
+        [
+          "windows",
+          ">= 1.34.6"
+        ]
+      ],
+      "version": "4.1.6",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/iis/versions/4.1.6/download",
+        "version": "4.1.6"
+      }
+    },
+    {
+      "name": "database",
+      "dependencies": [
+        [
+          "postgresql",
+          ">= 1.0.0"
+        ]
+      ],
+      "version": "4.0.9",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/database/versions/4.0.9/download",
+        "version": "4.0.9"
+      }
+    },
+    {
+      "name": "postgresql",
+      "dependencies": [
+        [
+          "apt",
+          ">= 1.9.0"
+        ],
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "openssl",
+          "~> 4.0"
+        ]
+      ],
+      "version": "4.0.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/postgresql/versions/4.0.0/download",
+        "version": "4.0.0"
+      }
+    },
+    {
+      "name": "apt",
+      "dependencies": [
+
+      ],
+      "version": "2.9.2",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/apt/versions/2.9.2/download",
+        "version": "2.9.2"
+      }
+    },
+    {
+      "name": "openssl",
+      "dependencies": [
+        [
+          "chef-sugar",
+          ">= 3.1.1"
+        ]
+      ],
+      "version": "4.4.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/openssl/versions/4.4.0/download",
+        "version": "4.4.0"
+      }
+    },
+    {
+      "name": "nginx",
+      "dependencies": [
+        [
+          "apt",
+          "~> 2.2"
+        ],
+        [
+          "bluepill",
+          "~> 2.3"
+        ],
+        [
+          "build-essential",
+          "~> 2.0"
+        ],
+        [
+          "ohai",
+          "~> 2.0"
+        ],
+        [
+          "runit",
+          "~> 1.2"
+        ],
+        [
+          "yum-epel",
+          "~> 0.3"
+        ]
+      ],
+      "version": "2.7.6",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/nginx/versions/2.7.6/download",
+        "version": "2.7.6"
+      }
+    },
+    {
+      "name": "bluepill",
+      "dependencies": [
+        [
+          "rsyslog",
+          "~> 2.0"
+        ]
+      ],
+      "version": "2.4.1",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/bluepill/versions/2.4.1/download",
+        "version": "2.4.1"
+      }
+    },
+    {
+      "name": "rsyslog",
+      "dependencies": [
+
+      ],
+      "version": "2.2.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/rsyslog/versions/2.2.0/download",
+        "version": "2.2.0"
+      }
+    },
+    {
+      "name": "ohai",
+      "dependencies": [
+
+      ],
+      "version": "2.1.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/ohai/versions/2.1.0/download",
+        "version": "2.1.0"
+      }
+    },
+    {
+      "name": "runit",
+      "dependencies": [
+        [
+          "packagecloud",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "1.7.6",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/runit/versions/1.7.6/download",
+        "version": "1.7.6"
+      }
+    },
+    {
+      "name": "packagecloud",
+      "dependencies": [
+
+      ],
+      "version": "0.2.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/packagecloud/versions/0.2.0/download",
+        "version": "0.2.0"
+      }
+    },
+    {
+      "name": "mysql2_chef_gem",
+      "dependencies": [
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "mysql",
+          ">= 6.0"
+        ],
+        [
+          "mariadb",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "1.1.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/mysql2_chef_gem/versions/1.1.0/download",
+        "version": "1.1.0"
+      }
+    },
+    {
+      "name": "mariadb",
+      "dependencies": [
+        [
+          "apt",
+          ">= 0.0.0"
+        ],
+        [
+          "yum",
+          ">= 0.0.0"
+        ],
+        [
+          "yum-epel",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "0.3.1",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/mariadb/versions/0.3.1/download",
+        "version": "0.3.1"
+      }
+    },
+    {
+      "name": "php-fpm",
+      "dependencies": [
+        [
+          "apt",
+          "> 0"
+        ],
+        [
+          "yum",
+          ">= 3.0"
+        ]
+      ],
+      "version": "0.7.5",
+      "source": {
+        "url": "https://github.com/67P/cookbook-php-fpm.git",
+        "ref": "00ae43a225cf23fd3ed937f27ab25aba8d812db9",
+        "type": "Batali::Source::Git",
+        "subdirectory": null
+      }
+    },
+    {
+      "name": "postfix",
+      "dependencies": [
+
+      ],
+      "version": "3.7.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/postfix/versions/3.7.0/download",
+        "version": "3.7.0"
+      }
+    },
+    {
+      "name": "unattended-upgrades",
+      "dependencies": [
+        [
+          "apt",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "0.1.2",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/unattended-upgrades/versions/0.1.2/download",
+        "version": "0.1.2"
+      }
+    },
+    {
+      "name": "users",
+      "dependencies": [
+
+      ],
+      "version": "2.0.3",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/users/versions/2.0.3/download",
+        "version": "2.0.3"
+      }
+    },
+    {
+      "name": "chef-solo-search",
+      "dependencies": [
+
+      ],
+      "version": "0.5.1",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/chef-solo-search/versions/0.5.1/download",
+        "version": "0.5.1"
+      }
+    },
+    {
+      "name": "sudo",
+      "dependencies": [
+
+      ],
+      "version": "2.9.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/sudo/versions/2.9.0/download",
+        "version": "2.9.0"
+      }
+    },
+    {
+      "name": "hostname",
+      "dependencies": [
+        [
+          "hostsfile",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "0.3.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/hostname/versions/0.3.0/download",
+        "version": "0.3.0"
+      }
+    },
+    {
+      "name": "hostsfile",
+      "dependencies": [
+
+      ],
+      "version": "2.4.5",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/hostsfile/versions/2.4.5/download",
+        "version": "2.4.5"
+      }
+    },
+    {
+      "name": "ufw",
+      "dependencies": [
+        [
+          "firewall",
+          ">= 2.0"
+        ]
+      ],
+      "version": "1.0.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/ufw/versions/1.0.0/download",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "name": "firewall",
+      "dependencies": [
+        [
+          "chef-sugar",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "2.5.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/firewall/versions/2.5.0/download",
+        "version": "2.5.0"
+      }
+    },
+    {
+      "name": "ssh_known_hosts",
+      "dependencies": [
+        [
+          "partial_search",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "2.0.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/ssh_known_hosts/versions/2.0.0/download",
+        "version": "2.0.0"
+      }
+    },
+    {
+      "name": "partial_search",
+      "dependencies": [
+
+      ],
+      "version": "1.0.9",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/partial_search/versions/1.0.9/download",
+        "version": "1.0.9"
+      }
+    },
+    {
+      "name": "omnibus_updater",
+      "dependencies": [
+
+      ],
+      "version": "1.0.6",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/omnibus_updater/versions/1.0.6/download",
+        "version": "1.0.6"
+      }
+    },
+    {
+      "name": "timezone-ii",
+      "dependencies": [
+
+      ],
+      "version": "0.2.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/timezone-ii/versions/0.2.0/download",
+        "version": "0.2.0"
+      }
+    },
+    {
+      "name": "ark",
+      "dependencies": [
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "windows",
+          ">= 0.0.0"
+        ],
+        [
+          "seven_zip",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "1.0.1",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/ark/versions/1.0.1/download",
+        "version": "1.0.1"
+      }
+    },
+    {
+      "name": "seven_zip",
+      "dependencies": [
+        [
+          "windows",
+          ">= 1.2.2"
+        ]
+      ],
+      "version": "1.0.4",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/seven_zip/versions/1.0.4/download",
+        "version": "1.0.4"
+      }
+    },
+    {
+      "name": "logrotate",
+      "dependencies": [
+
+      ],
+      "version": "1.9.2",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/logrotate/versions/1.9.2/download",
+        "version": "1.9.2"
+      }
+    },
+    {
+      "name": "git",
+      "dependencies": [
+        [
+          "build-essential",
+          ">= 0.0.0"
+        ],
+        [
+          "dmg",
+          ">= 0.0.0"
+        ],
+        [
+          "yum-epel",
+          ">= 0.0.0"
+        ]
+      ],
+      "version": "5.0.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/git/versions/5.0.0/download",
+        "version": "5.0.0"
+      }
+    },
+    {
+      "name": "dmg",
+      "dependencies": [
+
+      ],
+      "version": "2.4.0",
+      "source": {
+        "type": "Batali::Source::Site",
+        "url": "https://supermarket.chef.io:443/api/v1/cookbooks/dmg/versions/2.4.0/download",
+        "version": "2.4.0"
+      }
+    }
+  ]
+}

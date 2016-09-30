@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+# Install bundler if not present
+which bundle >/dev/null || gem install bundler --no-rdoc --no-ri
+
+echo "Installing Ruby dependencies"
+bundle install >/dev/null
+
+echo "All done."
+echo "Now copy encrypted_data_bag_secret to .chef/"

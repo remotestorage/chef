@@ -1,0 +1,31 @@
+# vim: set filetype=ruby
+
+Batali.define do
+  source 'https://supermarket.chef.io'
+
+  cookbook 'mediawiki',
+           git: 'https://github.com/67P/mediawiki-cookbook.git',
+           ref: 'nginx'
+  cookbook 'php-fpm',
+           git: 'https://github.com/67P/cookbook-php-fpm.git',
+           ref: 'ubuntu_systemd'
+  cookbook 'postfix'
+  cookbook 'unattended-upgrades'
+  cookbook 'users'
+  cookbook 'chef-solo-search'
+  cookbook 'sudo'
+  cookbook 'hostname'
+  cookbook 'ufw'
+  cookbook 'firewall'
+  cookbook 'ssh_known_hosts'
+  cookbook 'nginx'
+  cookbook 'build-essential', '~> 2.2.4'
+  cookbook 'mysql'
+  cookbook 'database'
+  cookbook 'mysql2_chef_gem'
+  cookbook 'omnibus_updater', '~> 1.0.4'
+  cookbook 'timezone-ii'
+  cookbook 'ark'
+  cookbook 'logrotate'
+  cookbook 'git'
+end

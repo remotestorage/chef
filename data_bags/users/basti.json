@@ -1,0 +1,9 @@
+{
+  "id": "basti",
+  "ssh_keys": [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbxLZdk2jpc7hkKX0CtJN0E4romB33YZTLl8m6OAydyr1/TcKQWmvEy4pYuBJPOCOm9bZQFvkSqHVysKKgDplXmKOH5ufjuD87XWRDDszvxEFzfphK6n58pomXgj5IUXIuzc+fTbgJhurRipPrUI7inhujgIcA+rjQgSM8aD7cRZZfn2cQeRSQIvmHUTUUxJDmYwYtVWN5+gk5//lfKIeYHn+hxhjy10GBbjpYLF4ZJXbSEVuwuB6qc8MbWgARdE+Arperh0EcvO449QKWCOaTRRofiGJFdfC4zDyzFecdVcy7I6ng+lJ4YnpXSO/Lytc/dTAT/LeMMyrWRsbWlRw1 cardno:000603504722"
+  ],
+  "groups": ["sysadmin"],
+  "uid": 2002,
+  "shell": "\/bin\/bash"
+}

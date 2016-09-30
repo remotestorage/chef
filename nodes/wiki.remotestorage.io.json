@@ -1,0 +1,9 @@
+{
+  "run_list": [
+    "role[base]",
+    "role[wiki]"
+  ],
+  "automatic": {
+    "ipaddress": "wiki.remotestorage.io"
+  }
+}

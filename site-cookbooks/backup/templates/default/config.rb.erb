@@ -1,0 +1,66 @@
+# encoding: utf-8
+
+##
+# Backup v4.x Configuration
+#
+# Documentation: http://backup.github.io/backup
+# Issue Tracker: https://github.com/backup/backup/issues
+
+Storage::S3.defaults do |s3|
+  s3.access_key_id     = "<%= @s3_access_key_id %>"
+  s3.secret_access_key = "<%= @s3_secret_access_key %>"
+  s3.region            = "<%= @s3_region %>"
+  s3.bucket            = "<%= node['backup']['s3']['bucket'] %>"
+end
+
+Encryptor::OpenSSL.defaults do |encryption|
+  encryption.password = "<%= @encryption_password %>"
+  encryption.base64   = true
+  encryption.salt     = true
+end
+
+Notifier::Mail.defaults do |mail|
+  mail.from                 = "<%= node.name %> <<%= @mail_from %>>"
+  mail.to                   = "<%= @mail_to %>"
+  mail.delivery_method      = :sendmail
+end
+
+<%- if node["backup"]["mongodb"] -%>
+Database::MongoDB.defaults do |db|
+  db.host  = "<%= node["backup"]["mongodb"]["host"] %>"
+  db.ipv6  = <%= node["backup"]["mongodb"]["ipv6"] %>
+  db.lock  = <%= node["backup"]["mongodb"]["lock"] %>
+  <% if node["mongodb"]["port"] -%>
+  db.port  = <%= node["mongodb"]["port"] %>
+  <% end -%>
+end
+<%- end -%>
+
+<%- if node["backup"]["mysql"] -%>
+Database::MySQL.defaults do |db|
+  db.host               = "<%= node["backup"]["mysql"]["host"] %>"
+  db.username           = "<%= node["backup"]["mysql"]["username"] %>"
+  db.password           = "<%= node["backup"]["mysql"]["password"] %>"
+  db.additional_options = ['--quick', '--single-transaction']
+end
+<%- end -%>
+
+Database::Redis.defaults do |db|
+  db.host               = "<%= node["backup"]["redis"]["host"] %>"
+  db.port               = 6379
+  db.invoke_save        = <%= node["backup"]["redis"]["invoke_save"] %>
+  <%# db.password           = "my_password"%>
+  <%# db.socket             = "/tmp/redis.sock"%>
+end
+
+preconfigure 'RemoteStorageBackup' do
+  split_into_chunks_of 250 # megabytes
+  store_with S3
+  compress_with Bzip2
+  encrypt_with OpenSSL
+  notify_by Mail do |mail|
+    mail.on_success = false
+    mail.on_warning = false
+    mail.on_failure = true
+  end
+end
