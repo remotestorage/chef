@@ -7,3 +7,4 @@ version "0.5.0"
 name "backup"
 
 depends 'logrotate'
+depends 'remotestorage-ruby'

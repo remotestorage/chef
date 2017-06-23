@@ -23,8 +23,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+include_recipe 'remotestorage-ruby'
+
 gem_package 'backup' do
-  version '4.2.3'
+  version '5.0.0.beta.1'
 end
 
 backup_data = Chef::EncryptedDataBagItem.load('credentials', 'backup')
