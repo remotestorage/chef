@@ -23,7 +23,7 @@ node.override['nginx']['log_formats']['json']  = <<-EOF
 EOF
 
 
-include_recipe 'nginx'
+include_recipe 'chef_nginx'
 include_recipe 'remotestorage-base::firewall'
 
 firewall_rule 'http/https' do
