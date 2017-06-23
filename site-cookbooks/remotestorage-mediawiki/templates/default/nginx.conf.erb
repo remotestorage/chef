@@ -1,6 +1,25 @@
+<% unless node.chef_environment == "development" -%>
 server {
         listen 80;
+        server_name <%= @server_name %>;
+        access_log   /var/log/nginx/<%= @server_name %>.access.log;
+        error_log    /var/log/nginx/<%= @server_name %>.error.log;
+
+        location /.well-known {
+                root <%= @docroot %>;
+        }
+        location / {
+                return 301 https://$host$request_uri;
+        }
+}
+<% end -%>
+
+server {
+        <% if File.exist?(@ssl_cert) && File.exist?(@ssl_key) -%>
         listen 443 ssl;
+        <% else -%>
+        listen 80;
+        <% end -%>
         server_name <%= @server_name %>;
 
         access_log   /var/log/nginx/<%= @server_name %>.access.log;
@@ -11,13 +30,6 @@ server {
 
         location / {
                 try_files $uri $uri/ /index.php?$args;
-                set $redirect_to_ssl "no";
-                if ($ssl_protocol = "") {
-                        set $redirect_to_ssl "yes";
-                }
-                if ($redirect_to_ssl = yes) {
-                        rewrite ^(.*) https://$host$1 permanent;
-                }
         }
 
         location ~ \.php$ {
@@ -30,6 +42,9 @@ server {
                 fastcgi_param HTTP_PROXY "";
         }
 
+        <% if File.exist?(@ssl_cert) && File.exist?(@ssl_key) -%>
+        add_header Strict-Transport-Security "max-age=15768000; includeSubDomains";
         ssl_certificate <%= @ssl_cert %>;
         ssl_certificate_key <%= @ssl_key %>;
+        <% end -%>
 }

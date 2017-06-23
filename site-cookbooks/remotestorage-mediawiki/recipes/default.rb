@@ -10,10 +10,10 @@
 include_recipe 'apt'
 include_recipe 'ark'
 
-node.override['mediawiki']['version']         = "1.27.1"
+node.override['mediawiki']['version']         = "1.28.2"
 node.override['mediawiki']['webdir']          = "#{node["mediawiki"]["docroot_dir"]}/mediawiki-#{node['mediawiki']['version']}"
 node.override['mediawiki']['tarball']['name'] = "mediawiki-#{node['mediawiki']['version']}.tar.gz"
-node.override['mediawiki']['tarball']['url']  = "https://releases.wikimedia.org/mediawiki/1.27/#{node['mediawiki']['tarball']['name']}"
+node.override['mediawiki']['tarball']['url']  = "https://releases.wikimedia.org/mediawiki/1.28/#{node['mediawiki']['tarball']['name']}"
 node.override['mediawiki']['language_code']   = 'en'
 node.override['mediawiki']['server_name']     = 'wiki.remotestorage.io'
 node.override['mediawiki']['site_name']       = 'remotestorage Wiki'
@@ -56,13 +56,16 @@ end
 include_recipe "mediawiki"
 include_recipe "remotestorage-nginx"
 include_recipe "mediawiki::nginx"
-include_recipe "remotestorage-base::letsencrypt"
 
-execute "letsencrypt cert for wiki.remotestorage.io" do
-  command "./certbot-auto certonly --webroot --agree-tos --email ops@5apps.com --webroot-path #{node["mediawiki"]["docroot_dir"]} -d wiki.remotestorage.io"
-  cwd "/usr/local/certbot"
-  not_if { File.exist? "/etc/letsencrypt/live/wiki.remotestorage.io/fullchain.pem" }
-  notifies :reload, "service[nginx]", :delayed
+unless node.chef_environment == "development"
+  include_recipe "remotestorage-base::letsencrypt"
+
+  # execute "letsencrypt cert for wiki.remotestorage.io" do
+  #   command "./certbot-auto certonly --webroot --agree-tos --email ops@5apps.com --webroot-path #{node["mediawiki"]["docroot_dir"]} -d wiki.remotestorage.io"
+  #   cwd "/usr/local/certbot"
+  #   not_if { File.exist? "/etc/letsencrypt/live/wiki.remotestorage.io/fullchain.pem" }
+  #   notifies :reload, "service[nginx]", :delayed
+  # end
 end
 
 template "#{node['nginx']['dir']}/sites-available/mediawiki" do
@@ -96,7 +99,11 @@ end
 
 # MediawikiHubot extension
 # requires curl extension
-package "php5-curl"
+if platform?('ubuntu') && node[:platform_version].to_f < 16.04
+  package "php5-curl"
+else
+  package "php-curl"
+end
 
 ark "MediawikiHubot" do
   url "https://github.com/67P/mediawiki-hubot/archive/master.zip"
@@ -162,12 +169,14 @@ $wgArticlePath = "/$1";
   end
 end
 
-node.override["backup"]["mysql"]["host"] = "localhost"
-node.override["backup"]["mysql"]["username"] = "root"
-node.override["backup"]["mysql"]["password"] = node["mediawiki"]["db"]["root_password"]
-unless node["backup"]["mysql"]["databases"].include? 'mediawikidb'
-  node.override["backup"]["mysql"]["databases"] =
-    node["backup"]["mysql"]["databases"].to_a << "mediawikidb"
-end
+unless node.chef_environment == "development"
+  node.override["backup"]["mysql"]["host"] = "localhost"
+  node.override["backup"]["mysql"]["username"] = "root"
+  node.override["backup"]["mysql"]["password"] = node["mediawiki"]["db"]["root_password"]
+  unless node["backup"]["mysql"]["databases"].include? 'mediawikidb'
+    node.override["backup"]["mysql"]["databases"] =
+      node["backup"]["mysql"]["databases"].to_a << "mediawikidb"
+  end
 
-include_recipe "backup"
+  include_recipe "backup"
+end
