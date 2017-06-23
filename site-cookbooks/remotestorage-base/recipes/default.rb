@@ -7,11 +7,14 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe 'timezone-ii'
+include_recipe 'timezone_iii'
+include_recipe 'ntp'
 
-node.override['omnibus_updater']['version']              = '12.13.37'
-node.override['omnibus_updater']['kill_chef_on_upgrade'] = false
-include_recipe 'omnibus_updater'
+# Update chef to the chosen version
+chef_version = '12.20.3'
+chef_client_updater "Install #{chef_version}" do
+  version chef_version
+end
 
 package 'mailutils'
 node.override['unattended-upgrades']['admin_email'] = 'ops@5apps.com'
