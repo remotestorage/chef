@@ -1,0 +1,17 @@
+[Unit]
+Description=discourse-sidekiq
+Requires=redis@6379.service
+After=redis@6379.service
+
+[Service]
+Type=simple
+User=<%= @user %>
+WorkingDirectory=<%= @app_dir %>
+Environment="RAILS_ENV=production"
+Environment="DB_POOL=5"
+ExecStart=<%= @bundle_path %> exec sidekiq -c 5 -q default -q mailers -q pull -q push
+TimeoutSec=15
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

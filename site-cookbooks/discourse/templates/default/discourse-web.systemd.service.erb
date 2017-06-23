@@ -1,0 +1,21 @@
+[Unit]
+Description=discourse-web
+Requires=redis@6379.service
+After=redis@6379.service
+Requires=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=simple
+User=<%= @user %>
+PIDFile=<%= @app_dir %>/tmp/puma.pid
+WorkingDirectory=<%= @app_dir %>
+ExecStart=<%= @bundle_path %> exec puma --pidfile <%= @app_dir %>/tmp/puma.pid -p 3000 -e production
+ExecStop=<%= @bundle_path %> exec puma --pidfile <%= @app_dir %>/tmp/puma.pid -p 3000 -e production stop
+ExecReload=<%= @bundle_path %> exec pumactl --pidfile <%= @app_dir %>/tmp/puma.pid -p 3000 -e production phased-restart
+ExecRestart=<%= @bundle_path %> exec pumactl --pidfile <%= @app_dir %>/tmp/puma.pid -p 3000 -e production restart
+TimeoutSec=15
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
