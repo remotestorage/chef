@@ -1,7 +1,26 @@
 # Change History
 
-0.3.0
-=====
+0.4.2 (2017-05-04)
+==================
+ - #51: Make host file idempotent on RHEL
+ - #52: Add `append_hostsfile_ip` logic for improved idempotence
+ - #55: Ensure sysctl `kernel.hostname` set correctly on RHEL
+
+0.4.1 (2017-04-24)
+==================
+ - #43: Set unique hosts file entry for hostname
+ - #44: Make hostname mapping to `127.0.0.1` optional
+ - #59: Updates to resolve deprecations warnings
+ - #60, #61: various test fixes
+ 
+0.4.0 (2015-03-16)
+==================
+ - #40: Use file resources with lazy eval and notifies to prevent network restarts from occurring on every chef run (Matt Kasa)
+ - Add box with Ubuntu 14.04 for kitchen tests
+ - #27: Update default recipe to reload only the hostname plugin instead of ohai (Jonathan Serafini)
+
+0.3.0 (2014-05-20)
+==================
  - Fixed (and tested) FreeBSD support
  - #17: added support for RedHat & CentOS (Damien Roche, Marta Paciorkowska)
  - added instructions on manual testing with reboot (Marta Paciorkowska)

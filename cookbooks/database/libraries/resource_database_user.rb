@@ -1,6 +1,6 @@
 #
 # Author:: Seth Chisamore (<schisamo@chef.io>)
-# Copyright:: Copyright (c) 2011 Chef Software, Inc.
+# Copyright:: 2011-2016 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ class Chef
         @privileges = [:all]
         @grant_option = false
         @require_ssl = false
+        @require_x509 = false
 
         @allowed_actions.push(:create, :drop, :grant, :revoke)
         @action = :create
@@ -56,6 +57,14 @@ class Chef
       def require_ssl(arg = nil)
         set_or_return(
           :require_ssl,
+          arg,
+          kind_of: [TrueClass, FalseClass]
+        )
+      end
+
+      def require_x509(arg = nil)
+        set_or_return(
+          :require_x509,
           arg,
           kind_of: [TrueClass, FalseClass]
         )

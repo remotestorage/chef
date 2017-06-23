@@ -1,11 +1,11 @@
 #
 # Author:: Bryan W. Berry (<bryan.berry@gmail.com>)
 # Author:: Seth Vargo (<sethvargo@gmail.com>)
-# Cookbook Name:: sudo
+# Cookbook:: sudo
 # Provider:: default
 #
-# Copyright 2011, Bryan w. Berry
-# Copyright 2012, Seth Vargo
+# Copyright:: 2011-2016, Bryan w. Berry
+# Copyright:: 2012-2016, Seth Vargo
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+use_inline_resources
 
 # This LWRP supports whyrun mode
 def whyrun_supported?
@@ -75,7 +77,7 @@ def render_sudoer
       action :nothing
     end
   else
-    sudoer = new_resource.user || "%#{new_resource.group}".squeeze('%')
+    sudoer = new_resource.user || ("%#{new_resource.group}".squeeze('%') if new_resource.group)
 
     resource = template "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{sudo_filename}" do
       source 'sudoer.erb'
@@ -87,6 +89,7 @@ def render_sudoer
                 host:               new_resource.host,
                 runas:              new_resource.runas,
                 nopasswd:           new_resource.nopasswd,
+                noexec:             new_resource.noexec,
                 commands:           new_resource.commands,
                 command_aliases:    new_resource.command_aliases,
                 defaults:           new_resource.defaults,
@@ -110,17 +113,22 @@ end
 action :install do
   target = "#{node['authorization']['sudo']['prefix']}/sudoers.d/"
 
+  package 'sudo' do
+    not_if 'which sudo'
+  end
+
   unless ::File.exist?(target)
     sudoers_dir = directory target
     sudoers_dir.run_action(:create)
   end
 
+  Chef::Log.warn("#{sudo_filename} will be rendered, but will not take effect because node['authorization']['sudo']['include_sudoers_d'] is set to false!") unless node['authorization']['sudo']['include_sudoers_d']
   new_resource.updated_by_last_action(true) if render_sudoer
 end
 
 # Removes a user from the sudoers group
 action :remove do
-  resource = file "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{new_resource.name}" do
+  resource = file "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{sudo_filename}" do
     action :nothing
   end
   resource.run_action(:delete)
@@ -130,9 +138,9 @@ end
 private
 
 # acording to the sudo man pages sudo will ignore files in an include dir that have a `.` or `~`
-# It is quite common for users to have a `.` in their login, so we will convert this to `__`
+# We convert either to `__`
 def sudo_filename
-  new_resource.name.gsub(/\./, '__')
+  new_resource.name.gsub(/[\.~]/, '__')
 end
 
 # Capture a template to a string

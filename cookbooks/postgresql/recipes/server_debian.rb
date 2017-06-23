@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 #
-# Cookbook Name:: postgresql
+# Cookbook:: postgresql
 # Recipe:: server
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +16,15 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
+include_recipe 'postgresql::client'
 
-node['postgresql']['server']['packages'].each do |pg_pack|
+package node['postgresql']['server']['packages']
 
-  package pg_pack
+include_recipe 'postgresql::server_conf'
 
-end
-
-include_recipe "postgresql::server_conf"
-
-service "postgresql" do
+service 'postgresql' do
   service_name node['postgresql']['server']['service_name']
-  supports :restart => true, :status => true, :reload => true
+  supports restart: true, status: true, reload: true
   action [:enable, :start]
 end
 

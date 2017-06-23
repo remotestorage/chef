@@ -10,15 +10,22 @@ when "rhel", "fedora"
 else
   user = "www-data"
   group = "www-data"
-  conf_dir = "/etc/php5/fpm/conf.d"
-  pool_conf_dir = "/etc/php5/fpm/pool.d"
-  if node.platform == "ubuntu" and node.platform_version.to_f <= 10.04
-    conf_file = "/etc/php5/fpm/php5-fpm.conf"
+  if platform?('ubuntu') and node['platform_version'].to_f >= 16.04
+    php_conf_dir = "/etc/php/7.0"
+    php_fpm_name = "php7.0-fpm"
   else
-    conf_file = "/etc/php5/fpm/php-fpm.conf"
+    php_conf_dir = "/etc/php5"
+    php_fpm_name = "php5-fpm"
   end
-  error_log = "/var/log/php5-fpm.log"
-  pid ="/var/run/php5-fpm.pid"
+  conf_dir = "#{php_conf_dir}/fpm/conf.d"
+  pool_conf_dir = "#{php_conf_dir}/fpm/pool.d"
+  if node['platform'] == "ubuntu" and node['platform_version'].to_f <= 10.04
+    conf_file = "#{php_conf_dir}/fpm/php5-fpm.conf"
+  else
+    conf_file = "#{php_conf_dir}/fpm/php-fpm.conf"
+  end
+  error_log = "/var/log/#{php_fpm_name}.log"
+  pid = "/var/run/#{php_fpm_name}.pid"
 end
 
 default['php-fpm']['user'] = user
@@ -28,11 +35,23 @@ default['php-fpm']['pool_conf_dir'] = pool_conf_dir
 default['php-fpm']['conf_file'] = conf_file
 default['php-fpm']['pid'] = pid
 default['php-fpm']['log_dir'] = '/var/log/php-fpm'
-default['php-fpm']['error_log'] =  error_log
+default['php-fpm']['error_log'] = error_log
 default['php-fpm']['log_level'] = "notice"
 default['php-fpm']['emergency_restart_threshold'] = 0
 default['php-fpm']['emergency_restart_interval'] = 0
 default['php-fpm']['process_control_timeout'] = 0
+default['php-fpm']['process_manager'] = 'ondemand'
+default['php-fpm']['max_children'] = 50
+default['php-fpm']['start_servers'] = 5
+default['php-fpm']['min_spare_servers'] = 5
+default['php-fpm']['max_spare_servers'] = 35
+default['php-fpm']['max_requests'] = 0
+default['php-fpm']['request_terminate_timeout'] = 0
+default['php-fpm']['catch_workers_output'] = 'no'
+default['php-fpm']['security_limit_extensions'] = '.php'
+default['php-fpm']['listen_mode'] = '0660'
+default['php-fpm']['listen'] = "/var/run/php-fpm-%{pool_name}.sock"
+
 default['php-fpm']['pools'] = {
   "www" => {
     :enable => true

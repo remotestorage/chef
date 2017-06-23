@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: sudo
+# Cookbook:: sudo
 # Recipe:: default
 #
-# Copyright 2008-2016, Chef Software, Inc.
+# Copyright:: 2008-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ if node['authorization']['sudo']['include_sudoers_d']
   end
 
   cookbook_file "#{prefix}/sudoers.d/README" do
-    source 'README'
     mode '0440'
     owner 'root'
     group node['root_group']
@@ -53,6 +52,8 @@ template "#{prefix}/sudoers" do
     sudoers_defaults: node['authorization']['sudo']['sudoers_defaults'],
     command_aliases: node['authorization']['sudo']['command_aliases'],
     env_keep_add: node['authorization']['sudo']['env_keep_add'],
-    env_keep_subtract: node['authorization']['sudo']['env_keep_subtract']
+    env_keep_subtract: node['authorization']['sudo']['env_keep_subtract'],
+    custom_commands_users: node['authorization']['sudo']['custom_commands']['users'],
+    custom_commands_groups: node['authorization']['sudo']['custom_commands']['groups']
   )
 end

@@ -1,6 +1,6 @@
 #
 # Author:: Sander van Harmelen (<svanharmelen@schubergphilis.com>)
-# Cookbook Name:: firewall
+# Cookbook:: firewall
 # Provider:: windows
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,24 +26,27 @@ class Chef
       false
     end
 
-    action :install do
-      next if disabled?(new_resource)
+    def action_install
+      return if disabled?(new_resource)
 
-      converge_by('enable and start Windows Firewall service') do
-        service 'MpsSvc' do
-          action [:enable, :start]
-        end
+      svc = service 'MpsSvc' do
+        action :nothing
+      end
+
+      [:enable, :start].each do |act|
+        svc.run_action(act)
+        new_resource.updated_by_last_action(true) if svc.updated_by_last_action?
       end
     end
 
-    action :restart do
-      next if disabled?(new_resource)
+    def action_restart
+      return if disabled?(new_resource)
 
       # ensure it's initialized
       new_resource.rules({}) unless new_resource.rules
       new_resource.rules['windows'] = {} unless new_resource.rules['windows']
 
-      firewall_rules = run_context.resource_collection.select { |item| item.is_a?(Chef::Resource::FirewallRule) }
+      firewall_rules = Chef.run_context.resource_collection.select { |item| item.is_a?(Chef::Resource::FirewallRule) }
       firewall_rules.each do |firewall_rule|
         next unless firewall_rule.action.include?(:create) && !firewall_rule.should_skip?(:create)
 
@@ -57,9 +60,16 @@ class Chef
         end
       end
 
+      input_policy = node['firewall']['windows']['defaults']['policy']['input']
+      output_policy = node['firewall']['windows']['defaults']['policy']['output']
+      unless new_resource.rules['windows'].key?("set currentprofile firewallpolicy #{input_policy},#{output_policy}")
+        # Make this the possible last rule in the list
+        new_resource.rules['windows']["set currentprofile firewallpolicy #{input_policy},#{output_policy}"] = 99999
+      end
+
       # ensure a file resource exists with the current rules
       begin
-        windows_file = run_context.resource_collection.find(file: windows_rules_filename)
+        windows_file = Chef.run_context.resource_collection.find(file: windows_rules_filename)
       rescue
         windows_file = file windows_rules_filename do
           action :nothing
@@ -69,44 +79,48 @@ class Chef
       windows_file.run_action(:create)
 
       # if the file was changed, restart iptables
-      if windows_file.updated_by_last_action?
-        disable! if active?
-        delete_all_rules! # clear entirely
-        reset! # populate default rules
+      return unless windows_file.updated_by_last_action?
 
-        new_resource.rules['windows'].sort_by { |_k, v| v }.map { |k, _v| k }.each do |cmd|
-          add_rule!(cmd)
-        end
-        # ensure it's enabled _after_ rules are inputted, to catch malformed rules
-        enable! unless active?
+      disable! if active?
+      delete_all_rules! # clear entirely
+      reset! # populate default rules
 
+      new_resource.rules['windows'].sort_by { |_k, v| v }.map { |k, _v| k }.each do |cmd|
+        add_rule!(cmd)
+      end
+      # ensure it's enabled _after_ rules are inputted, to catch malformed rules
+      enable! unless active?
+
+      new_resource.updated_by_last_action(true)
+    end
+
+    def action_disable
+      return if disabled?(new_resource)
+
+      if active?
+        disable!
+        Chef::Log.info("#{new_resource} disabled.")
         new_resource.updated_by_last_action(true)
+      else
+        Chef::Log.debug("#{new_resource} already disabled.")
+      end
+
+      svc = service 'MpsSvc' do
+        action :nothing
+      end
+
+      [:disable, :stop].each do |act|
+        svc.run_action(act)
+        new_resource.updated_by_last_action(true) if svc.updated_by_last_action?
       end
     end
 
-    action :disable do
-      next if disabled?(new_resource)
-
-      converge_by('disable and stop Windows Firewall service') do
-        if active?
-          disable!
-          Chef::Log.info("#{new_resource} disabled.")
-          new_resource.updated_by_last_action(true)
-        else
-          Chef::Log.debug("#{new_resource} already disabled.")
-        end
-
-        service 'MpsSvc' do
-          action [:disable, :stop]
-        end
-      end
-    end
-
-    action :flush do
-      next if disabled?(new_resource)
+    def action_flush
+      return if disabled?(new_resource)
 
       reset!
       Chef::Log.info("#{new_resource} reset.")
+      new_resource.updated_by_last_action(true)
     end
   end
 end

@@ -10,7 +10,7 @@ PLEASE NOTE - The resource/providers in this cookbook are under heavy developmen
 
 Requirements
 ------------
-**Chef 12.4.x+** is required. We are currently testing against 12.5.1. If you need Chef 11 support, please try pinning back to a version less than 2.0, e.g.:
+**Chef 12.4.x+** is required. We are currently testing against 12.8.1. If you need Chef 11 support, please try pinning back to a version less than 2.0, e.g.:
 ```
 depends 'firewall', '< 2.0'
 ```
@@ -22,7 +22,7 @@ depends 'firewall', '< 2.0'
 * Windows Advanced Firewall - 2012 R2
 
 Tested on:
-* Ubuntu 12.04 & 14.04 with iptables, ufw
+* Ubuntu 12.04, 14.04, 16.04 with iptables, ufw
 * Debian 7.8, 8.1 with ufw
 * CentOS 5.11, 6.7 with iptables
 * CentOS 7.1 with firewalld
@@ -58,15 +58,17 @@ node.default['firewall']['iptables']['defaults'][:ruleset] = {
   '*filter' => 1,
   ':INPUT DROP' => 2,
   ':FORWARD DROP' => 3,
-  ':OUTPUT ACCEPT' => 4,
+  ':OUTPUT ACCEPT_FILTER' => 4,
   'COMMIT_FILTER' => 100,
   '*nat' => 101,
   ':PREROUTING DROP' => 102,
   ':POSTROUTING DROP' => 103,
-  ':OUTPUT ACCEPT' => 104,
+  ':OUTPUT ACCEPT_NAT' => 104,
   'COMMIT_NAT' => 200
 }
 ```
+
+Note -- in order to support multiple hash keys containing the same rule, anything found after the underscore will be stripped for: `:OUTPUT :INPUT :POSTROUTING :PREROUTING COMMIT`. This allows an example like the above to be reduced to just repeated lines of `COMMIT` and `:OUTPUT ACCEPT` while still avoiding duplication of other things.
 
 Then it's trivial to add additional rules to the `*nat` table using the raw parameter:
 ```
@@ -82,19 +84,26 @@ keys must be unique but we need multiple commit lines.
 # Recipes
 
 ### default
-The default recipe creates a firewall resource with action install, and if `node['firewall']['allow_ssh']`, opens port 22 from the world.
+The default recipe creates a firewall resource with action install.
+
+### disable_firewall
+Used to disable platform specific firewall. Many clouds have their own firewall configured outside of the OS instance such as AWS Security Groups.
 
 # Attributes
 
 * `default['firewall']['allow_ssh'] = false`, set true to open port 22 for SSH when the default recipe runs
 * `default['firewall']['allow_mosh'] = false`, set to true to open UDP ports 60000 - 61000 for [Mosh][0] when the default recipe runs
 * `default['firewall']['allow_winrm'] = false`, set true to open port 5989 for WinRM when the default recipe runs
+* `default['firewall']['allow_loopback'] = false`, set to true to allow all traffic on the loopback interface
+* `default['firewall']['allow_icmp'] = false`, set true to allow icmp protocol on supported OSes (note: ufw and windows implementations don't support this)
 
 * `default['firewall']['ubuntu_iptables'] = false`, set to true to use iptables on Ubuntu / Debian when using the default recipe
 * `default['firewall']['redhat7_iptables'] = false`, set to true to use iptables on Red Hat / CentOS 7 when using the default recipe
 
 * `default['firewall']['ufw']['defaults']` hash for template `/etc/default/ufw`
 * `default['firewall']['iptables']['defaults']` hash for default policies for 'filter' table's chains`
+
+* `default['firewall']['windows']['defaults']` hash to define inbound / outbound firewall policy on Windows platform
 
 * `default['firewall']['allow_established'] = true`, set to false if you don't want a related/established default rule on iptables
 * `default['firewall']['ipv6_enabled'] = true`, set to false if you don't want IPv6 related/established default rule on iptables (this enables ICMPv6, which is required for much of IPv6 communication)
@@ -117,10 +126,11 @@ The default recipe creates a firewall resource with action install, and if `node
 
 - `disabled` (default to `false`): If set to true, all actions will no-op on this resource. This is a way to prevent included cookbooks from configuring a firewall.
 - `ipv6_enabled` (default to `true`): If set to false, firewall will not perform any ipv6 related work. Currently only supported in iptables.
-- `log_level`: UFW only. Level of verbosity the firewall should log at. valid values are: :low, :medium, :high, :full. default is :low.
+- `log_level`: UFW only. Level of verbosity the firewall should log at. valid values are: :low, :medium, :high, :full, :off. default is :low.
 - `rules`: This is used internally for firewall_rule resources to append their rules. You should NOT touch this value unless you plan to supply an entire firewall ruleset at once, and skip using firewall_rule resources.
 - `disabled_zone` (firewalld only): The zone to set on firewalld when the firewall should be disabled. Can be any string in symbol form, e.g. :public, :drop, etc. Defaults to `:public.`
 - `enabled_zone` (firewalld only): The zone to set on firewalld when the firewall should be enabled. Can be any string in symbol form, e.g. :public, :drop, etc. Defaults to `:drop.`
+- `package_options`: Used to pass options to the package install of firewall
 
 #### Examples
 

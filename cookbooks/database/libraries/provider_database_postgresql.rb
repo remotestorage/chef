@@ -1,7 +1,7 @@
 #
 # Author:: Seth Chisamore (<schisamo@chef.io>)
 # Author:: Lamont Granquist (<lamont@chef.io>)
-# Copyright:: Copyright (c) 2011 Chef Software, Inc.
+# Copyright:: 2011-2016 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ class Chef
   class Provider
     class Database
       class Postgresql < Chef::Provider::LWRPBase
-        use_inline_resources if defined?(use_inline_resources)
+        use_inline_resources
 
         def whyrun_supported?
           true
@@ -31,7 +31,12 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'pg'
+          begin
+            require 'pg'
+          rescue LoadError
+            Chef::Log.fatal('Could not load the required pg gem. Make sure to include the database::postgresql or postgresql::ruby recipes in your runlist')
+            raise
+          end
           @current_resource = Chef::Resource::Database.new(@new_resource.name)
           @current_resource.database_name(@new_resource.database_name)
           @current_resource
@@ -134,7 +139,11 @@ class Chef
         end
 
         def close
-          @db.close rescue nil
+          begin
+            @db.close
+          rescue
+            nil
+          end
           @db = nil
         end
       end

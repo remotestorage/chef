@@ -10,7 +10,19 @@
 include_recipe "apt"
 
 include_recipe "php::default"
-include_recipe "php::module_apc"
+
+if node['platform'] == 'ubuntu' and node['platform_version'] >= '16.04'
+  # APC is now apcu in PHP 7
+  include_recipe "php::module_apcu"
+  # Dependency
+  package "php7.0-mbstring"
+else
+  if node['platform_version'] == '15.04'
+    node.override['php']['apc']['package'] = 'php-apc'
+    node.override['php']['apcu']['package']  = 'php5-apcu'
+  end
+  include_recipe "php::module_apc"
+end
 include_recipe "php::module_mysql"
 
 include_recipe "mediawiki::database"
@@ -38,8 +50,11 @@ when "debian"
   package "libicu-dev"
 end
 
-php_pear "intl" do
-  action :install
+if platform?('ubuntu') && node[:platform_version].to_f < 16.04
+  # bundled with PHP since version 5.3
+  php_pear "intl" do
+    action :install
+  end
 end
 
 # Configure mediawiki database

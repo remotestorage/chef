@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 #
-# Cookbook Name:: postgresql
+# Cookbook:: postgresql
 # Recipe:: default
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,4 +16,4 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
+include_recipe 'postgresql::client'

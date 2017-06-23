@@ -2,6 +2,50 @@ firewall Cookbook CHANGELOG
 =======================
 This file is used to list changes made in each version of the firewall cookbook.
 
+v2.6.2 (2017-06-01)
+-------------------
+* Incorrect file checking on Ubuntu, double file write (#173)
+* Added testing on CentOS 6.9
+* Clarify metadata that we're not working on Amazon Linux (#172)
+
+v2.6.1 (2017-04-21)
+-------------------
+* Add recipe to disable firewall (#164)
+
+v2.6.0 (2017-04-17)
+-------------------
+* Initial Chef 13.x support (#160, #159)
+* Allow loopback and icmp, when enabled (#161)
+* Address various newer rubocop and foodcritic complaints
+* Convert rule provider away from DSL (#159)
+
+v2.5.4 (2017-02-13)
+-------------------
+* Update Test Kitchen platforms to the latest
+* Update copyright headers
+* Allow package options to be passed through to the package install for firewall
+* Define policy for Windows Firewall and use the attributes to set desired policy
+
+v2.5.3 (2016-10-26)
+-------------------
+* Don't show firewall resource as updated (#133)
+* Add :off as a valid logging level (#129)
+* Add support for Ubuntu 16.04 (#149)
+
+v2.5.2 (2016-06-02)
+-------------------
+* Don't issue commands when firewalld isn't active (#140)
+* Install iptables-services on CentOS >= 7 (#131)
+* Update Ruby version on Travis for listen gem
+
+v2.5.1 (2016-05-31)
+-------------------
+* Protocol guard incorrectly prevents "none" protocol type on UFW helper (#128)
+* Fix wrongly ordered conditional for converting ports to strings using port_to_s
+* Fix notify_firewall attribute crashing firewall_rule provider (#130)
+* Add warning if firewall rule opens all traffic (#132)
+* Add ipv6 attribute respect to Ubuntu iptables (#138)
+
 v2.5.0 (2016-03-08)
 -------------------
 * Don't modify parameter for port (#120)

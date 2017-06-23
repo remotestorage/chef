@@ -1,6 +1,6 @@
 #
 # Author:: Seth Chisamore (<schisamo@chef.io>)
-# Copyright:: Copyright (c) 2011 Chef Software, Inc.
+# Copyright:: 2011-2016 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,12 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'tiny_tds'
+          begin
+            require 'tiny_tds'
+          rescue LoadError
+            Chef::Log.fatal('Could not load the required tiny_tds gem. Make sure to install this in your wrapper cookbook')
+            raise
+          end
           @current_resource = Chef::Resource::DatabaseUser.new(@new_resource.name)
           @current_resource.username(@new_resource.name)
           @current_resource
@@ -106,22 +111,12 @@ class Chef
           Chef::Log.info("SQL Server Version: #{server_version.inspect}")
           db.execute('USE [master]').do
           @new_resource.sql_sys_roles.each do |sql_sys_role, role_action|
-            case role_action
-            when 'ADD'
-              if server_version < '11.00.0000.00'
-                alter_statement = "EXEC sp_addsrvrolemember '#{@new_resource.username}', '#{sql_sys_role}'"
-              else
-                alter_statement = "ALTER SERVER ROLE #{sql_role} #{role_action} MEMBER [#{@new_resource.username}]"
-              end
-              Chef::Log.info("#{@new_resource} granting server role membership with statement [#{alter_statement}]")
-            when 'DROP'
-              if server_version < '11.00.0000.00'
-                alter_statement = "EXEC sp_dropsrvrolemember '#{@new_resource.username}', '#{sql_sys_role}'"
-              else
-                alter_statement = "ALTER SERVER ROLE #{sql_role} #{role_action} MEMBER [#{@new_resource.username}]"
-              end
-              Chef::Log.info("#{@new_resource} revoking server role membership with statement [#{alter_statement}]")
-            end
+            alter_statement = if server_version < '11.00.0000.00'
+                                "EXEC sp_#{role_action.downcase}srvrolemember '#{@new_resource.username}', '#{sql_sys_role}'"
+                              else
+                                "ALTER SERVER ROLE #{sql_sys_role} #{role_action} MEMBER [#{@new_resource.username}]"
+                              end
+            Chef::Log.info("#{@new_resource} granting server role membership with statement [#{alter_statement}]")
             db.execute(alter_statement).do
           end
           @new_resource.updated_by_last_action(true)

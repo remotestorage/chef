@@ -31,7 +31,10 @@ if fqdn
   fqdn =~ /^([^.]+)/
   hostname = Regexp.last_match[1]
 
-  case node['platform']
+  aliases = node['hostname_cookbook']['hostsfile_aliases']
+  aliases += [hostname] if node['hostname_cookbook']['hostsfile_include_hostname_in_aliases']
+
+  case node['platform_family']
   when 'freebsd'
     directory '/etc/rc.conf.d' do
       mode '0755'
@@ -53,48 +56,59 @@ if fqdn
 
     execute "hostname #{fqdn}" do
       only_if { node['fqdn'] != fqdn }
-      notifies :reload, 'ohai[reload]', :immediately
+      notifies :reload, 'ohai[reload_hostname]', :immediately
     end
 
-  when 'centos', 'redhat', 'amazon', 'scientific'
+  when 'rhel'
+    service 'network' do
+      action :nothing
+    end
     hostfile = '/etc/sysconfig/network'
-    ruby_block "Update #{hostfile}" do
-      block do
-        file = Chef::Util::FileEdit.new(hostfile)
-        file.search_file_replace_line('^HOSTNAME', "HOSTNAME=#{fqdn}")
-        file.write_file
-      end
-      notifies :reload, 'ohai[reload]', :immediately
+    file hostfile do
+      action :create
+      content lazy {
+        ::IO.read(hostfile).gsub(/^HOSTNAME=.*$/, "HOSTNAME=#{fqdn}")
+      }
+      not_if { ::IO.read(hostfile) =~ /^HOSTNAME=#{fqdn}$/ }
+      notifies :reload, 'ohai[reload_hostname]', :immediately
+      notifies :restart, 'service[network]', :delayed
     end
     # this is to persist the correct hostname after machine reboot
     sysctl = '/etc/sysctl.conf'
-    ruby_block "Update #{sysctl}" do
-      block do
-        file = Chef::Util::FileEdit.new(sysctl)
-        file.insert_line_if_no_match("kernel.hostname=#{hostname}", \
-                                     "kernel.hostname=#{hostname}")
-        file.write_file
-      end
-      notifies :reload, 'ohai[reload]', :immediately
+    file sysctl do
+      action :create
+      regex = /^kernel\.hostname=.*/
+      newline = "kernel.hostname=#{hostname}"
+      content lazy {
+        original = ::IO.read(sysctl)
+        original.match(regex) ? original.gsub(regex, newline) : original + newline
+      }
+      not_if { ::IO.read(sysctl).scan(regex).last == newline }
+      notifies :reload, 'ohai[reload_hostname]', :immediately
+      notifies :restart, 'service[network]', :delayed
     end
     execute "hostname #{hostname}" do
       only_if { node['hostname'] != hostname }
-      notifies :reload, 'ohai[reload]', :immediately
+      notifies :reload, 'ohai[reload_hostname]', :immediately
     end
-    service 'network' do
-      action :restart
+    # update /etc/hostname in RHEL7+
+    file '/etc/hostname' do
+      content "#{hostname}\n"
+      mode '0644'
+      only_if { ::File.exist?('/etc/hostname') }
+      notifies :reload, 'ohai[reload_hostname]', :immediately
     end
 
   else
     file '/etc/hostname' do
       content "#{hostname}\n"
       mode '0644'
-      notifies :reload, 'ohai[reload]', :immediately
+      notifies :reload, 'ohai[reload_hostname]', :immediately
     end
 
     execute "hostname #{hostname}" do
       only_if { node['hostname'] != hostname }
-      notifies :reload, 'ohai[reload]', :immediately
+      notifies :reload, 'ohai[reload_hostname]', :immediately
     end
   end
 
@@ -107,12 +121,15 @@ if fqdn
   hostsfile_entry 'set hostname' do
     ip_address node['hostname_cookbook']['hostsfile_ip']
     hostname fqdn
-    aliases [hostname]
+    aliases aliases
+    unique true
     action :create
-    notifies :reload, 'ohai[reload]', :immediately
+    notifies :reload, 'ohai[reload_hostname]', :immediately
+    only_if { node['hostname_cookbook']['append_hostsfile_ip'] }
   end
 
-  ohai 'reload' do
+  ohai 'reload_hostname' do
+    plugin 'hostname'
     action :nothing
   end
 else
