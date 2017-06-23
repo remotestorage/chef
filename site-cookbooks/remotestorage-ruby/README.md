@@ -1,0 +1,2 @@
+remotestorage-ruby Cookbook
+===================
