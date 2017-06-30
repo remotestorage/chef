@@ -98,7 +98,14 @@ application discourse_path do
   rails do
     migrate true
     rails_env "production"
+    # There's a bug in the current application_ruby cookbook, it tries to
+    # precompile the assets before running the migration
     precompile_assets false
+  end
+
+  # Precompiling the assets here, after running the migrations
+  ruby_execute 'rake assets:precompile' do
+    command %w{rake assets:precompile}
   end
 
   execute "systemctl daemon-reload" do
