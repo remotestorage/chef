@@ -24,6 +24,7 @@
 # default attributes for all platforms
 default['ntp']['servers'] = [] # The default recipe sets a list of common NTP servers (COOK-1170)
 default['ntp']['peers'] = []
+default['ntp']['pools'] = []
 default['ntp']['restrictions'] = []
 default['ntp']['tinker'] = { 'panic' => 0 }
 
@@ -90,6 +91,7 @@ when 'debian'
   default['ntp']['apparmor_enabled'] = true if File.exist? '/etc/init.d/apparmor'
 when 'rhel', 'fedora'
   default['ntp']['packages'] = %w(ntp ntpdate) if node['platform_version'].to_i >= 7
+  default['ntp']['driftfile'] = "#{node['ntp']['varlibdir']}/drift"
 when 'windows'
   default['ntp']['service'] = 'NTP'
   default['ntp']['driftfile'] = 'C:\\NTP\\ntp.drift'
@@ -108,6 +110,10 @@ when 'freebsd'
 when 'gentoo'
   default['ntp']['leapfile'] = "#{node['ntp']['varlibdir']}/ntp.leapseconds"
 when 'solaris2'
+  if node['platform_version'] < '5.11'
+    default['ntp']['packages'] = %w(SUNWntpu SUNWntpr)
+    default['ntp']['pkg_source'] = '/var/spool/pkg'
+  end
   default['ntp']['service'] = 'ntp'
   default['ntp']['varlibdir'] = '/var/ntp'
   default['ntp']['conffile'] = '/etc/inet/ntp.conf'
@@ -123,6 +129,8 @@ when 'pld'
   default['ntp']['leapfile'] = '/etc/ntp/ntp.leapseconds'
   default['ntp']['driftfile'] = "#{node['ntp']['varlibdir']}/drift"
   default['ntp']['var_owner'] = 'root'
+when 'suse'
+  default['ntp']['service'] = 'ntp' if node['platform_version'].to_f < 12
 end
 
 unless node['platform'] == 'windows'

@@ -7,11 +7,11 @@ Batali.define do
            git: 'https://github.com/67P/mediawiki-cookbook.git',
            ref: 'nginx'
   cookbook 'php-fpm',                '~> 0.7.9'
-  cookbook 'php',                    '~> 4.2.0'
-  cookbook 'postfix'
-  cookbook 'unattended-upgrades'
+  cookbook 'php',                    '~> 4.4.0'
+  cookbook 'postfix',                '~> 5.0.3'
+  cookbook 'unattended-upgrades',    '~> 0.1.2'
   cookbook 'users',                  '~> 5.1.0'
-  cookbook 'sudo',                   '~> 3.5.0'
+  cookbook 'sudo',                   '~> 3.5.2'
   cookbook 'hostname',               '~> 0.4.2'
   cookbook 'firewall',               '~> 2.6.2'
   cookbook 'chef_nginx',             '~> 6.1.1'
@@ -19,11 +19,11 @@ Batali.define do
   cookbook 'mysql',                  '~> 8.4.0'
   cookbook 'database',               '~> 6.1.1'
   cookbook 'mysql2_chef_gem'
-  cookbook 'chef_client_updater',    '~> 1.1.1'
+  cookbook 'chef_client_updater',    '~> 2.0.3'
   cookbook 'timezone_iii',           '~> 1.0.4'
   cookbook 'ark',                    '~> 3.1.0'
   cookbook 'logrotate',              '~> 2.2.0'
-  cookbook 'ntp',                    '~> 3.4.0'
+  cookbook 'ntp',                    '~> 3.5.0'
   cookbook 'application',            '~> 5.2.0'
   cookbook 'application_ruby',       '~> 4.1.0'
   cookbook 'application_git',        '~> 1.1.0' # 1.2.0 doesn't work with knife-solo
@@ -33,4 +33,11 @@ Batali.define do
   cookbook 'poise-javascript',       '~> 1.2.0'
   cookbook 'redisio',                '~> 2.6.1'
   cookbook 'postgresql',             '~> 6.1.1'
+  cookbook 'openssl',                '~> 7.1.0'
+  cookbook 'seven_zip',              '~> 2.0.2'
+  cookbook 'apt',                    '~> 6.1.2'
+  cookbook 'ohai',                   '~> 5.1.0'
+
+  # Unused, but dependency of dependencies
+  cookbook 'windows',                '~> 3.1.1'
 end

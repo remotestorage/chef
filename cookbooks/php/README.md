@@ -19,7 +19,6 @@ It installs and configures PHP and the PEAR package management system. Also incl
 ### Cookbooks
 
 - build-essential
-- xml
 - mysql
 
 ## Attributes
@@ -33,9 +32,9 @@ The file also contains the following attribute types:
 - platform specific locations and settings.
 - source installation settings
 
-## Resource/Provider
+## Resources
 
-This cookbook includes LWRPs for managing:
+This cookbook includes resources for managing:
 
 - PEAR channels
 - PEAR/PECL packages
@@ -46,16 +45,16 @@ This cookbook includes LWRPs for managing:
 
 #### Actions
 
-- :discover: Initialize a channel from its server.
-- :add: Add a channel to the channel list, usually only used to add private channels. Public channels are usually added using the `:discover` action
-- :update: Update an existing channel
-- :remove: Remove a channel from the List
+- `:discover`: Initialize a channel from its server.
+- `:add`: Add a channel to the channel list, usually only used to add private channels. Public channels are usually added using the `:discover` action
+- `:update`: Update an existing channel
+- `:remove`: Remove a channel from the List
 
-#### Attribute Parameters
+#### Properties
 
-- channel_name: name attribute. The name of the channel to discover
-- channel_xml: the channel.xml file of the channel you are adding
-- pear: pear binary, default: pear
+- `channel_name`: name attribute. The name of the channel to discover
+- `channel_xml`: the channel.xml file of the channel you are adding
+- `pear`: pear binary, default: pear
 
 #### Examples
 
@@ -67,10 +66,10 @@ end
 
 # download xml then add the symfony channel
 remote_file "#{Chef::Config[:file_cache_path]}/symfony-channel.xml" do
-  source "http://pear.symfony-project.com/channel.xml"
-  mode 0644
+  source 'http://pear.symfony-project.com/channel.xml'
+  mode '0644'
 end
-php_pear_channel "symfony" do
+php_pear_channel 'symfony' do
   channel_xml "#{Chef::Config[:file_cache_path]}/symfony-channel.xml"
   action :add
 end
@@ -88,16 +87,17 @@ end
 
 ### `php_pear`
 
-[PEAR](http://pear.php.net/) is a framework and distribution system for reusable PHP components. [PECL](http://pecl.php.net/) is a repository for PHP Extensions. PECL contains C extensions for compiling into PHP. As C programs, PECL extensions run more efficiently than PEAR packages. PEARs and PECLs use the same packaging and distribution system. As such this LWRP is clever enough to abstract away the small differences and can be used for managing either. This LWRP also creates the proper module .ini file for each PECL extension at the correct location for each supported platform.
+[PEAR](http://pear.php.net/) is a framework and distribution system for reusable PHP components. [PECL](http://pecl.php.net/) is a repository for PHP Extensions. PECL contains C extensions for compiling into PHP. As C programs, PECL extensions run more efficiently than PEAR packages. PEARs and PECLs use the same packaging and distribution system. As such this resource is clever enough to abstract away the small differences and can be used for managing either. This resource also creates the proper module .ini file for each PECL extension at the correct location for each supported platform.
 
 #### Actions
 
 - `:install`: Install a pear package - if version is provided, install that specific version
 - `:upgrade`: Upgrade a pear package - if version is provided, upgrade to that specific version
 - `:remove`: Remove a pear package
-- `:purge`: Purge a pear package (this usually entails removing configuration files as well as the package itself). With pear packages this behaves the same as `:remove`
+- `:reinstall`: Force install of the package even if the same version is already installed. Note: This will converge on every Chef run and is probably not what you want.
+- `:purge`: An alias for remove as the two behave the same in pear
 
-#### Attribute Parameters
+#### Properties
 
 - `package_name`: name attribute. The name of the pear package to install
 - version: the version of the pear package to install/upgrade. If no version is given latest is assumed.
@@ -110,55 +110,53 @@ end
 
 ```ruby
 # upgrade a pear
-php_pear "XML_RPC" do
+php_pear 'XML_RPC' do
   action :upgrade
 end
 
-
 # install a specific version
-php_pear "XML_RPC" do
-  version "1.5.4"
+php_pear 'XML_RPC' do
+  version '1.5.4'
   action :install
 end
 
-
 # install the mongodb pecl
-php_pear "mongo" do
+php_pear 'Install mongo but use a different resource name' do
+  package_name 'mongo'
   action :install
 end
 
 # install the xdebug pecl
-php_pear "xdebug" do
+php_pear 'xdebug' do
   # Specify that xdebug.so must be loaded as a zend extension
   zend_extensions ['xdebug.so']
   action :install
 end
 
-
 # install apc pecl with directives
-php_pear "apc" do
+php_pear 'apc' do
   action :install
-  directives(:shm_size => 128, :enable_cli => 1)
+  directives(shm_size: 128, enable_cli: 1)
 end
-
 
 # install the beta version of Horde_Url
 # from the horde channel
-hc = php_pear_channel "pear.horde.org" do
+hc = php_pear_channel 'pear.horde.org' do
   action :discover
 end
-php_pear "Horde_Url" do
-  preferred_state "beta"
+
+php_pear 'Horde_Url' do
+  preferred_state 'beta'
   channel hc.channel_name
   action :install
 end
 
-
 # install the YAML pear from the symfony project
-sc = php_pear_channel "pear.symfony-project.com" do
+sc = php_pear_channel 'pear.symfony-project.com' do
   action :discover
 end
-php_pear "YAML" do
+
+php_pear 'YAML' do
   channel sc.channel_name
   action :install
 end
@@ -195,7 +193,7 @@ More info: <http://php.net/manual/en/install.fpm.php>
 
 ```ruby
 # Install a FPM pool named "default"
-php_fpm_pool "default" do
+php_fpm_pool 'default' do
   action :install
 end
 ```
@@ -231,18 +229,14 @@ The following recipes are deprecated and will be removed from a future version o
 - `module_pgsql`
 - `module_sqlite3`
 
-The installation of the php modules in these recipes can now be accomplished by installing from a native package or via the new php_pear LWRP. For example, the functionality of the `module_memcache` recipe can be enabled in the following ways:
+The installation of the php modules in these recipes can now be accomplished by installing from a native package or via the new php_pear resource. For example, the functionality of the `module_memcache` recipe can be enabled in the following ways:
 
 ```ruby
 # using apt
-package "php5-memcache" do
-  action :install
-end
+package 'php5-memcache'
 
-# using pear LWRP
-php_pear "memcache" do
-  action :install
-end
+# using pear resource
+php_pear 'memcache'
 ```
 
 ## Usage
@@ -252,15 +246,15 @@ Simply include the `php` recipe where ever you would like php installed. To inst
 ### Role example:
 
 ```ruby
-name "php"
-description "Install php from source"
+name 'php'
+description 'Install php from source'
 override_attributes(
-  "php" => {
-    "install_method" => "source"
+  'php' => {
+    'install_method' => 'source',
   }
 )
 run_list(
-  "recipe[php]"
+  'recipe[php]'
 )
 ```
 
