@@ -11,7 +11,7 @@ include_recipe 'timezone_iii'
 include_recipe 'ntp'
 
 # Update chef to the chosen version
-chef_version = '12.20.3'
+chef_version = '12.21.1'
 chef_client_updater "Install #{chef_version}" do
   version chef_version
 end

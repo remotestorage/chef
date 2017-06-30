@@ -72,7 +72,7 @@ Vagrant.configure(2) do |config|
   # Install latest Chef via Omnibus
   # Needs `vagrant plugin install vagrant-omnibus`
   if Vagrant.has_plugin?("vagrant-omnibus")
-    config.omnibus.chef_version = "12.20.3"
+    config.omnibus.chef_version = "12.21.1"
   end
 
   config.vm.provision :chef_zero do |chef|
