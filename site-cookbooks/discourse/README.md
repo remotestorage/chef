@@ -1,80 +1,49 @@
 # discourse Cookbook
 
-TODO: Enter the cookbook description here.
-
-e.g.
-This cookbook makes your favorite breakfast sandwich.
+This cookbook installs Discourse (https://discourse.org/)
 
 ## Requirements
 
-TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
-
-e.g.
-### Platforms
-
-- SandwichOS
+- Ubuntu
 
 ### Chef
 
 - Chef 12.0 or later
 
-### Cookbooks
-
-- `toaster` - discourse needs toaster to brown your bagel.
-
-## Attributes
-
-TODO: List your cookbook attributes here.
-
-e.g.
-### discourse::default
-
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Description</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td><tt>['discourse']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
-  </tr>
-</table>
-
 ## Usage
 
 ### discourse::default
 
-TODO: Write usage instructions for each cookbook.
+Installs discourse
 
-e.g.
-Just include `discourse` in your node's `run_list`:
+#### Caveat
 
-```json
-{
-  "name":"my_node",
-  "run_list": [
-    "recipe[discourse]"
-  ]
-}
+The confirmation email for the admin account isn't sent. Confirm it in
+a Rails console after creating it in the web interface
+
+http://community.remotestorage.io/finish-installation/register
+
+```
+sudo su - discourse
+RAILS_ENV=production bundle exec rails c
+User.last.activate
 ```
 
-## Contributing
+#### Restore a backup
 
-TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
+Login with your new admin account
+(http://community.remotestorage.io/login).
 
-e.g.
-1. Fork the repository on Github
-2. Create a named feature branch (like `add_component_x`)
-3. Write your change
-4. Write tests for your change (if applicable)
-5. Run the tests, ensuring they all pass
-6. Submit a Pull Request using Github
+Go to
+http://community.remotestorage.io/admin/site_settings/category/backups?filter=
+and check "allow restore"
 
-## License and Authors
+Go to http://community.remotestorage.io/admin/backups, upload a backup from the
+existing forums
 
-Authors: TODO: List authors
+Go to http://community.remotestorage.io/admin/site_settings/category/email?filter=
+and uncheck "disable emails"
 
+### discourse::nginx
+
+Sets up the nginx vhost
