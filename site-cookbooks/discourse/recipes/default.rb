@@ -76,10 +76,10 @@ application discourse_path do
               "DISCOURSE_DEVELOPER_EMAILS" => "greg@5apps.com,sebastian@5apps.com,garret@5apps.com"
 
   git do
-    user "discourse"
-    group "discourse"
+    user       "discourse"
+    group      "discourse"
     repository "https://github.com/discourse/discourse"
-    revision   "v1.8.1"
+    revision   node["discourse"]["version"]
   end
 
   # discourse_credentials = Chef::EncryptedDataBagItem.load('credentials', 'discourse')
