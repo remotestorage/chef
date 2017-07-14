@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+node.override['redisio']['version'] = '3.2.9'
 include_recipe 'redisio'
 include_recipe 'redisio::enable'
 
