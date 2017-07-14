@@ -27,6 +27,7 @@ Vagrant.configure(2) do |config|
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network :private_network, ip: "33.33.33.11"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -69,13 +70,8 @@ Vagrant.configure(2) do |config|
   #   sudo apt-get install -y apache2
   # SHELL
 
-  # Install latest Chef via Omnibus
-  # Needs `vagrant plugin install vagrant-omnibus`
-  if Vagrant.has_plugin?("vagrant-omnibus")
-    config.omnibus.chef_version = "12.21.1"
-  end
-
   config.vm.provision :chef_zero do |chef|
+    chef.version                            = '12.21.3'
     chef.cookbooks_path                     = ['./cookbooks', './site-cookbooks']
     chef.data_bags_path                     = './data_bags'
     chef.roles_path                         = './roles'
