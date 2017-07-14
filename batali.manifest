@@ -36,7 +36,7 @@
       "version": "0.3.0",
       "source": {
         "url": "https://github.com/67P/mediawiki-cookbook.git",
-        "ref": "8d225fe5fd9886771420b1e6cfa3103077cb6b6f",
+        "ref": "925d54ca8cfbd9b17d55a753ca75d74fa5086eee",
         "type": "Batali::Source::Git",
         "subdirectory": null
       }
