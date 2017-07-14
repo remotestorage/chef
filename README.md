@@ -17,7 +17,7 @@ mediawiki recipe has been tested on a temporary server on Digital Ocean)
 
 ### Run Chef Solo
 
-    knife solo cook root@IP
+   knife zero converge name:web.remotestorage.io -x root
 
 
 ### Bootstrap the new server
@@ -25,8 +25,8 @@ mediawiki recipe has been tested on a temporary server on Digital Ocean)
     knife digital_ocean droplet create --server-name web.remotestorage.io \
                                        --image ubuntu-16-04-x64 \
                                        --location fra1 \
-                                       --size 1gb \
+                                       --size 2gb \
                                        --ssh-keys 11577,1536005 \
-                                       --run-list "role[mediawiki],role[discourse]" \
+                                       --run-list "role[wiki],role[discourse]" \
                                        --secret-file ".chef/encrypted_data_bag_secret" \
                                        --solo
