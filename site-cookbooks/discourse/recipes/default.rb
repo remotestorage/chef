@@ -66,13 +66,14 @@ user "discourse" do
   home discourse_path
 end
 
-# package %w()
+package %w(imagemagick)
 
 application discourse_path do
   owner "discourse"
   group "discourse"
 
-  environment "HOME" => discourse_path
+  environment "HOME" => discourse_path,
+              "DISCOURSE_DEVELOPER_EMAILS" => "greg@5apps.com,sebastian@5apps.com,garret@5apps.com"
 
   git do
     user "discourse"
@@ -113,6 +114,18 @@ application discourse_path do
     action :nothing
   end
 
+  smtp_credentials = Chef::EncryptedDataBagItem.load('credentials', 'smtp')
+
+  environment_for_services = {
+    "DISCOURSE_DEVELOPER_EMAILS" => "greg@5apps.com,sebastian@5apps.com,garret@5apps.com",
+    # We store the port in the database, only get the SMTP host
+    "DISCOURSE_SMTP_ADDRESS" => smtp_credentials['relayhost'][/([^\:])+/],
+    "DISCOURSE_SMTP_PORT" => 587,
+    "DISCOURSE_SMTP_USER_NAME" => smtp_credentials['user_name'],
+    "DISCOURSE_SMTP_PASSWORD" => smtp_credentials['password'],
+    "DISCOURSE_HOSTNAME" => "community.remotestorage.io"
+  }
+
   # discourse-web service
   #
   template "/lib/systemd/system/discourse-web.service" do
@@ -120,7 +133,8 @@ application discourse_path do
     variables user: user,
               app_dir: discourse_path,
               port: node["discourse"]["puma_port"],
-              bundle_path: "/usr/local/bin/bundle"
+              bundle_path: "/usr/local/bin/bundle",
+              environment: environment_for_services
     notifies :run, "execute[systemctl daemon-reload]", :delayed
     notifies :restart, "service[discourse-web]", :delayed
   end
@@ -135,7 +149,8 @@ application discourse_path do
     source "discourse-sidekiq.systemd.service.erb"
     variables user: user,
               app_dir: discourse_path,
-              bundle_path: "/usr/local/bin/bundle"
+              bundle_path: "/usr/local/bin/bundle",
+              environment: environment_for_services
     notifies :run, "execute[systemctl daemon-reload]", :delayed
     notifies :restart, "service[discourse-sidekiq]", :delayed
   end

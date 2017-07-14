@@ -36,11 +36,11 @@ nginx_site 'discourse' do
 end
 
 unless node.chef_environment == "development"
-  include_recipe "kosmos-base::letsencrypt"
-  execute "letsencrypt cert for #{server_name}" do
-    command "./certbot-auto certonly --webroot --agree-tos --email ops@5apps.com --webroot-path /var/www/discourse -d #{server_name} -n"
-    cwd "/usr/local/certbot"
-    not_if { File.exist? "/etc/letsencrypt/live/#{server_name}/fullchain.pem" }
-    notifies :create, "template[#{node['nginx']['dir']}/sites-available/discourse]", :immediately
-  end
+  include_recipe "remotestorage-base::letsencrypt"
+  # execute "letsencrypt cert for #{server_name}" do
+  #   command "./certbot-auto certonly --webroot --agree-tos --email ops@5apps.com --webroot-path /var/www/discourse -d #{server_name} -n"
+  #   cwd "/usr/local/certbot"
+  #   not_if { File.exist? "/etc/letsencrypt/live/#{server_name}/fullchain.pem" }
+  #   notifies :create, "template[#{node['nginx']['dir']}/sites-available/discourse]", :immediately
+  # end
 end

@@ -7,6 +7,7 @@ After=postgresql.service
 
 [Service]
 Type=simple
+Environment=<%= @environment.map {|key, val| %Q{"#{key}=#{val}"} }.join(' ') %>
 User=<%= @user %>
 PIDFile=<%= @app_dir %>/tmp/puma.pid
 WorkingDirectory=<%= @app_dir %>

@@ -3,6 +3,7 @@ map $http_upgrade $connection_upgrade {
   ''      close;
 }
 
+<% unless node.chef_environment == "development" -%>
 server {
   listen 80;      # IPv4
   listen [::]:80; #IPv6
@@ -14,14 +15,23 @@ server {
   location /.well-known {
     root "/var/www/discourse";
   }
+  <% if File.exist?(@ssl_cert) &&
+        File.exist?(@ssl_key) -%>
   location / {
     return 301 https://$host$request_uri;
   }
+  <% end -%>
 }
+<% end -%>
 
 server {
+  <% if node.chef_environment == "development" -%>
+  listen 80;      # IPv4
+  listen [::]:80; #IPv6
+  <% else -%>
   listen 443 ssl http2;      #IPv4
   listen [::]:443 ssl http2; #IPv6
+  <% end -%>
   server_name <%= @server_name %>;
 
   access_log "/var/log/nginx/discourse.access.log";

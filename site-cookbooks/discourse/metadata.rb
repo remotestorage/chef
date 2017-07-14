@@ -8,6 +8,7 @@ version          '0.1.0'
 
 depends "remotestorage-nginx"
 depends "remotestorage-redis"
+depends "remotestorage-base"
 depends "application_ruby"
 depends "postgresql"
 depends "database"

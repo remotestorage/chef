@@ -9,6 +9,7 @@ User=<%= @user %>
 WorkingDirectory=<%= @app_dir %>
 Environment="RAILS_ENV=production"
 Environment="DB_POOL=5"
+Environment=<%= @environment.map {|key, val| %Q{"#{key}=#{val}"} }.join(' ') %>
 ExecStart=<%= @bundle_path %> exec sidekiq -c 5 -q default -q mailers -q pull -q push
 TimeoutSec=15
 Restart=always
