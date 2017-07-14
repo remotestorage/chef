@@ -10,58 +10,46 @@
 include_recipe 'timezone_iii'
 include_recipe 'ntp'
 
-# Update chef to the chosen version
-chef_version = '12.21.1'
-chef_client_updater "Install #{chef_version}" do
-  version chef_version
-end
-
 package 'mailutils'
-node.override['unattended-upgrades']['admin_email'] = 'ops@5apps.com'
-include_recipe 'unattended-upgrades'
-
 include_recipe 'apt'
-apt_repository 'brightbox_ruby' do
-  uri 'http://ppa.launchpad.net/brightbox/ruby-ng/ubuntu'
-  distribution node['lsb']['codename']
-  components ['main']
-  keyserver 'keyserver.ubuntu.com'
-  key '80F70E11F0F0D5F10CB20E62F5DA5F09C3173AA6'
-  notifies :run, 'execute[apt-get update]', :immediately
-end
 
-apt_package 'ruby-switch'
-
-["libruby2.2", "ruby2.2-dev", "build-essential", "libssl-dev", "zlib1g-dev"].each do |pkg|
-  apt_package pkg do
-    action :install
+unless node.chef_environment == "development"
+  # Update chef to the chosen version
+  chef_version = '12.21.3'
+  chef_client_updater "Install #{chef_version}" do
+    version chef_version
   end
+
+  node.override['unattended-upgrades']['admin_email'] = 'ops@5apps.com'
+  include_recipe 'unattended-upgrades'
+
+  package 'mosh'
+
+  # Searches data bag "users" for groups attribute "sysadmin".
+  # Places returned users in Unix group "sysadmin" with GID 2300.
+  users_manage 'sysadmin' do
+    group_id 2300
+    action [:remove, :create]
+  end
+
+  node.override['authorization']['sudo']['sudoers_defaults'] = [
+    # not default on Ubuntu, explicitely enable. Uses a minimal white list of
+    # environment variables
+    'env_reset',
+    # Send emails on unauthorized attempts
+    'mail_badpass',
+    'secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"',
+  ]
+  node.override['authorization']['sudo']['passwordless'] = true
+  include_recipe 'sudo'
+
+  include_recipe 'remotestorage-base::firewall'
+
+  node.override['set_fqdn'] = '*'
+  include_recipe 'hostname'
 end
 
-apt_package "ruby2.2" do
-  action :install
-  notifies :run, 'execute[set default ruby]', :immediately
-end
-
-execute 'set default ruby' do
-  command "ruby-switch --set ruby2.2"
-  action :nothing
-  notifies :reload, 'ohai[reload]', :immediately
-end
-
-package 'mosh'
-
-include_recipe 'users::sysadmins'
-
-node.override['authorization']['sudo']['passwordless'] = true
-include_recipe 'sudo'
-
-include_recipe 'postfix'
-
-node.override['set_fqdn'] = '*'
-include_recipe 'hostname'
-
-include_recipe 'remotestorage-base::firewall'
+include_recipe 'remotestorage-postfix'
 
 package 'ca-certificates'
 
