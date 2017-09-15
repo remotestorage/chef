@@ -1,0 +1,33 @@
+DEPENDENCIES
+  build-essential
+  redisio
+    path: .
+    metadata: true
+  ulimit (>= 0.1.2)
+  yum-epel
+  yum-remi
+
+GRAPH
+  build-essential (8.0.1)
+    mingw (>= 1.1)
+    seven_zip (>= 0.0.0)
+  compat_resource (12.19.0)
+  mingw (2.0.0)
+    seven_zip (>= 0.0.0)
+  ohai (5.0.3)
+  redisio (2.6.0)
+    build-essential (>= 0.0.0)
+    selinux_policy (>= 0.0.0)
+    ulimit (>= 0.1.2)
+  selinux_policy (2.0.1)
+    compat_resource (>= 12.16.3)
+  seven_zip (2.0.2)
+    windows (>= 1.2.2)
+  ulimit (0.4.0)
+  windows (3.0.5)
+    ohai (>= 4.0.0)
+  yum (5.0.1)
+  yum-epel (2.1.1)
+    compat_resource (>= 12.16.3)
+  yum-remi (0.1.0)
+    yum (>= 0.0.0)

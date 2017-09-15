@@ -25,12 +25,12 @@ include Chef::Mixin::ShellOut
 provides :chef_client_updater if respond_to?(:provides)
 
 def load_mixlib_install
-  gem 'mixlib-install', '~> 3.2', '>= 3.2.1'
+  gem 'mixlib-install', '~> 3.3', '>= 3.3.4'
   require 'mixlib/install'
 rescue LoadError
   Chef::Log.info('mixlib-install gem not found. Installing now')
   chef_gem 'mixlib-install' do
-    version '>= 3.2.1'
+    version '>= 3.3.4'
     compile_time true if respond_to?(:compile_time)
   end
 
@@ -50,13 +50,17 @@ end
 
 def update_rubygems
   gem_bin = "#{Gem.bindir}/gem"
+  if !::File.exist?(gem_bin) && windows?
+    gem_bin = "#{Gem.bindir}/gem.cmd" # on Chef Client 13+ the rubygem executable is gem.cmd, not gem
+  end
   raise 'cannot find omnibus install' unless ::File.exist?(gem_bin)
 
   rubygems_version = Gem::Version.new(shell_out("#{gem_bin} --version").stdout.chomp)
   target_version = '2.6.11'
+  Chef::Log.debug("Found gem version #{rubygems_version}. Desired version is at least #{target_version}")
   return if Gem::Requirement.new(">= #{target_version}").satisfied_by?(rubygems_version)
 
-  converge_by "upgrading rubygems to #{target_version} was #{rubygems_version}" do
+  converge_by "upgrade rubygems #{rubygems_version} to latest" do
     # note that the rubygems that we're upgrading is likely so old that you can't pin a version
     shell_out!("#{gem_bin} update --system --no-rdoc --no-ri")
   end
@@ -71,6 +75,7 @@ end
 def mixlib_install
   load_mixlib_install
   detected_platform = Mixlib::Install.detect_platform
+  Chef::Log.debug("Platform detected as #{detected_platform} by mixlib_install")
   options = {
     product_name: 'chef',
     platform_version_compatibility_mode: true,
@@ -81,8 +86,10 @@ def mixlib_install
     product_version: new_resource.version == 'latest' ? :latest : new_resource.version,
   }
   if new_resource.download_url_override && new_resource.checksum
+    Chef::Log.debug('Passing download_url_override and checksum to mixlib_install')
     options[:install_command_options] = { download_url_override: new_resource.download_url_override, checksum: new_resource.checksum }
   end
+  Chef::Log.debug("Passing options to mixlib-install: #{options}")
   Mixlib::Install.new(options)
 end
 
@@ -93,8 +100,24 @@ def current_version
   node['chef_packages']['chef']['version']
 end
 
+# the version we WANT TO INSTALL. If :latest is specified this will be the actual
+# latest version returned by mixlib-install. if download_url_override is passed
+# we parse the version, but blindly assume it's correct. Otherwise we rely on
+# mixlib-install to give us the exact version since someone could pass ~12 which
+# needs to be expanded to the latest 12.X.
 def desired_version
-  new_resource.version.to_sym == :latest ? mixlib_install.available_versions.last : new_resource.version
+  if new_resource.download_url_override
+    # probably in an air-gapped environment.
+    version = Mixlib::Versioning.parse(new_resource.version)
+    Chef::Log.debug("download_url_override specified. Using specified version of #{version}")
+  elsif new_resource.version.to_sym == :latest
+    version = Mixlib::Versioning.parse(mixlib_install.available_versions.last)
+    Chef::Log.debug("Version set to :latest, which currently maps to #{version}")
+  else
+    version = Mixlib::Versioning.parse(Array(mixlib_install.artifact_info).first.version)
+    Chef::Log.debug("Desired version in specified channel maps to #{version}")
+  end
+  version
 end
 
 # why wouldn't we use the built in update_available? method in mixlib-install?
@@ -103,28 +126,23 @@ end
 def update_necessary?
   load_mixlib_versioning
   cur_version = Mixlib::Versioning.parse(current_version)
-  # we have to "resolve" partial versions like "12" through mixlib-install before comparing them here
-  des_version =
-    if new_resource.download_url_override
-      # probably in an air-gapped environment.
-      Mixlib::Versioning.parse(desired_version)
-    else
-      Mixlib::Versioning.parse(mixlib_install.artifact_info.version)
-    end
-  Chef::Log.debug("The current chef-client version is #{cur_version} and the desired version is #{desired_version}")
+  des_version = desired_version
+
+  Chef::Log.debug("The current chef-client version is #{cur_version} and the desired version is #{des_version}")
   new_resource.prevent_downgrade ? (des_version > cur_version) : (des_version != cur_version)
 end
 
 def eval_post_install_action
   return unless new_resource.post_install_action == 'exec'
 
-  if Chef::Config[:interval]
-    Chef::Log.warn 'post_install_action "exec" not supported for long-running client process -- changing to "kill".'
+  if Chef::Config[:interval] || Chef::Config[:client_fork]
+    Chef::Log.warn 'post_install_action "exec" not supported for chef-client running forked -- changing to "kill".'
     new_resource.post_install_action = 'kill'
   end
 
-  return if Process.respond_to?(:exec)
-  Chef::Log.warn 'post_install_action Process.exec not available -- changing to "kill".'
+  return unless windows?
+
+  Chef::Log.warn 'forcing "exec" to "kill" on windows.'
   new_resource.post_install_action = 'kill'
 end
 
@@ -142,11 +160,11 @@ def run_post_install_action
         Chef::LocalMode.destroy_server_connectivity
       end
     end
-    Chef::Log.warn 'Replacing ourselves with the new version of Chef to continue the run.'
+    Chef::Log.warn 'Replacing chef-client process with upgraded version and re-running.'
     Kernel.exec(new_resource.exec_command, *new_resource.exec_args)
   when 'kill'
     if Chef::Config[:client_fork] && Process.ppid != 1 && !windows?
-      Chef::Log.warn 'Chef client is defined for forked runs. Sending TERM to parent process!'
+      Chef::Log.warn 'Chef client is running forked with a supervisor. Sending TERM to parent process!'
       Process.kill('TERM', Process.ppid)
     end
     Chef::Log.warn 'New chef-client installed. Forcing chef exit!'
@@ -167,7 +185,7 @@ end
 # cleanup cruft from *prior* runs
 def cleanup
   if ::File.exist?(chef_backup_dir) # rubocop:disable Style/GuardClause
-    converge_by("removing #{chef_backup_dir}") do
+    converge_by("remove #{chef_backup_dir} from previous chef-client run") do
       FileUtils.rm_rf chef_backup_dir
     end
   end
@@ -182,7 +200,7 @@ end
 # gem files.
 #
 def move_opt_chef(src, dest)
-  converge_by("moving all files under #{src} to #{dest}") do
+  converge_by("move all files under #{src} to #{dest}") do
     FileUtils.rm_rf dest
     raise "rm_rf of #{dest} failed" if ::File.exist?(dest) # detect mountpoints that were not deleted
     FileUtils.mv src, dest
@@ -226,13 +244,15 @@ action :update do
     load_prerequisites!
 
     if update_necessary?
-      converge_by "Upgraded chef-client #{current_version} to #{desired_version}" do
+      converge_by "upgrade chef-client #{current_version} to #{desired_version}" do
         # we have to get the script from mibxlib-install..
         install_script = mixlib_install.install_command
         # ...before we blow mixlib-install away
         move_opt_chef(chef_install_dir, chef_backup_dir)
 
         execute_install_script(install_script)
+      end
+      converge_by 'take post install action' do
         run_post_install_action
       end
     end

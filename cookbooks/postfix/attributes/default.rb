@@ -33,6 +33,7 @@ default['postfix']['main_template_source'] = 'postfix'
 default['postfix']['master_template_source'] = 'postfix'
 default['postfix']['sender_canonical_map_entries'] = {}
 default['postfix']['smtp_generic_map_entries'] = {}
+default['postfix']['recipient_canonical_map_entries'] = {}
 default['postfix']['access_db_type'] = 'hash'
 default['postfix']['aliases_db_type'] = 'hash'
 default['postfix']['transport_db_type'] = 'hash'
@@ -98,6 +99,8 @@ when 'smartos'
   default['postfix']['main']['smtp_use_tls'] = 'no'
   default['postfix']['cafile'] = '/opt/local/etc/postfix/cacert.pem'
 when 'rhel'
+  default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
+when 'amazon'
   default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
 else
   default['postfix']['cafile'] = "#{node['postfix']['conf_dir']}/cacert.pem"

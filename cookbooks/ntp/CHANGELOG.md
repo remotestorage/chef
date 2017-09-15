@@ -2,6 +2,18 @@
 
 This file is used to list changes made in each version of the ntp cookbook.
 
+## 3.5.2 (2017-08-16)
+
+- Fix apprarmor denied for sock_type=dgram in ubuntu dists.
+
+## 3.5.1 (2017-06-28)
+
+- Use the latest NTP release on windows to resolve several bugs
+- Fix Amazon Linux support on Chef 13
+- Allow windows to sync to the hardware clock when not virtualized since Ohai has provided Windows with virtualization data for a while now
+- Update inspec tests to pass on Windows
+- Update Chefspecs for the latest platforms
+
 ## 3.5.0 (2017-06-27)
 
 - Change RHEL platforms to use the driftfile location RHEL ships out of the box

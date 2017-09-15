@@ -10,9 +10,9 @@ On RHEL-family systems, sendmail will be replaced with postfix.
 
 ### Platforms
 
-- Ubuntu 12.04+
-- Debian 7.0+
-- RHEL/CentOS/Scientific 5.7+, 6.2+
+- Ubuntu
+- Debian
+- RHEL/CentOS/Scientific
 - Amazon Linux (as of AMIs created after 4/9/2012)
 
 May work on other platforms with or without modification.
@@ -79,6 +79,8 @@ This change in namespace to `node['postfix']['main']` should allow for greater f
 - `node['postfix']['sasl']['smtp_sasl_passwd']` - SASL password to use. Default empty.
 - `node['postfix']['sender_canonical_map_entries']` - (hash with key value pairs); default not configured. Setup generic canonical maps. See `man 5 canonical`. If has at least one value, then will be enabled in config.
 - `node['postfix']['smtp_generic_map_entries']` - (hash with key value pairs); default not configured. Setup generic postfix maps. See `man 5 generic`. If has at least one value, then will be enabled in config.
+- `node['postfix']['recipient_canonical_map_entries']` - (hash with key value pairs); default not configured. Setup generic canonical maps. See `man 5 canonical`. If has at least one value, then will be enabled in config.
+
 
 Example of json role config, for setup *_map_entries:
 
@@ -425,11 +427,14 @@ override_attributes(
 )
 ```
 
-## License & Authors
+## Maintainers
 
-**Author:** Cookbook Engineering Team ([cookbooks@chef.io](mailto:cookbooks@chef.io))
+This cookbook is maintained by Chef's Community Cookbook Engineering team. Our goal is to improve cookbook quality and to aid the community in contributing to cookbooks. To learn more about our team, process, and design goals see our [team documentation](https://github.com/chef-cookbooks/community_cookbook_documentation/blob/master/COOKBOOK_TEAM.MD). To learn more about contributing to cookbooks like this see our [contributing documentation](https://github.com/chef-cookbooks/community_cookbook_documentation/blob/master/CONTRIBUTING.MD), or if you have general questions about this cookbook come chat with us in #cookbok-engineering on the [Chef Community Slack](http://community-slack.chef.io/)
 
-**Copyright:** 2009-2016, Chef Software, Inc.
+## License
+
+
+**Copyright:** 2009-2017, Chef Software, Inc.
 
 ```
 Licensed under the Apache License, Version 2.0 (the "License");

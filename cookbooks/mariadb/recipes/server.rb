@@ -18,38 +18,54 @@
 #
 
 Chef::Recipe.send(:include, MariaDB::Helper)
+
+extend Chef::Util::Selinux
+selinux_enabled = selinux_enabled?
+
 case node['mariadb']['install']['type']
 when 'package'
-  if use_os_native_package?(node['mariadb']['install']['prefer_os_package'],
-                            node['platform'], node['platform_version'])
-    # currently, no releases with apt (e.g. ubuntu) ship mariadb
-    # only provide one type of server here (with yum support)
-    include_recipe "#{cookbook_name}::_redhat_server_native"
-  else
-    include_recipe "#{cookbook_name}::repository"
-
-    case node['platform']
-    when 'debian', 'ubuntu'
-      include_recipe "#{cookbook_name}::_debian_server"
-    when 'redhat', 'centos', 'fedora', 'scientific', 'amazon'
-      include_recipe "#{cookbook_name}::_redhat_server"
-    end
+  # Determine service name and register the resource
+  service_name = mariadb_service_name(node['platform'],
+                                      node['platform_version'],
+                                      node['mariadb']['install']['version'],
+                                      node['mariadb']['install']['prefer_os_package'],
+                                      node['mariadb']['install']['prefer_scl_package'])
+  node.default['mariadb']['mysqld']['service_name'] = service_name unless service_name.nil?
+  service 'mysql' do
+    service_name node['mariadb']['mysqld']['service_name']
+    supports restart: true
+    action :nothing
   end
-when 'from_source'
-  # To be filled as soon as possible
+
+  # Include recipe to install required repositories
+  include_recipe "#{cookbook_name}::_mariadb_repository"
+
+  # Include platform specific recipes
+  case node['platform']
+  when 'debian', 'ubuntu'
+    include_recipe "#{cookbook_name}::_debian_server"
+  when 'redhat', 'centos', 'scientific', 'amazon'
+    include_recipe "#{cookbook_name}::_redhat_server"
+  end
+
+  # Install server package
+  server_package_name = packages_names_to_install(node['platform'],
+                                                  node['platform_version'],
+                                                  node['mariadb']['install']['version'],
+                                                  node['mariadb']['install']['prefer_os_package'],
+                                                  node['mariadb']['install']['prefer_scl_package'])['server']
+  package 'MariaDB-server' do
+    package_name server_package_name
+    action :install
+    notifies :enable, 'service[mysql]'
+  end
 end
 
 include_recipe "#{cookbook_name}::config"
 
-service 'mysql' do
-  service_name node['mariadb']['mysqld']['service_name']
-  supports restart: true
-  action :nothing
-end
-
 # move the datadir if needed
 if node['mariadb']['mysqld']['datadir'] !=
-   node['mariadb']['mysqld']['default_datadir']
+    node['mariadb']['mysqld']['default_datadir']
 
   bash 'move-datadir' do
     user 'root'
@@ -63,10 +79,18 @@ if node['mariadb']['mysqld']['datadir'] !=
     action :nothing
   end
 
+  bash 'Restore security context' do
+    user 'root'
+    code "/usr/sbin/restorecon -v #{node['mariadb']['mysqld']['default_datadir']}"
+    only_if { selinux_enabled }
+    subscribes :run, 'bash[move-datadir]', :immediately
+    action :nothing
+  end
+
   directory node['mariadb']['mysqld']['datadir'] do
     owner 'mysql'
     group 'mysql'
-    mode 00750
+    mode '0750'
     action :create
     notifies :stop, 'service[mysql]', :immediately
     notifies :run, 'bash[move-datadir]', :immediately
@@ -93,11 +117,11 @@ end
 if node['mariadb']['allow_root_pass_change']
   # Used to change root password after first install
   # Still experimental
-  if node['mariadb']['server_root_password'].empty?
-    md5 = Digest::MD5.hexdigest('empty')
-  else
-    md5 = Digest::MD5.hexdigest(node['mariadb']['server_root_password'])
-  end
+  md5 = if node['mariadb']['server_root_password'].empty?
+          Digest::MD5.hexdigest('empty')
+        else
+          Digest::MD5.hexdigest(node['mariadb']['server_root_password'])
+        end
 
   file '/etc/mysql_root_change' do
     content md5
@@ -107,24 +131,27 @@ if node['mariadb']['allow_root_pass_change']
 end
 
 if  node['mariadb']['allow_root_pass_change'] ||
-    node['mariadb']['forbid_remote_root']
+    node['mariadb']['remove_anonymous_users'] ||
+    node['mariadb']['forbid_remote_root'] ||
+    node['mariadb']['remove_test_database']
   execute 'install-grants' do
-    # Add sensitive true when foodcritic #233 fixed
-    command '/bin/bash /etc/mariadb_grants \'' + \
+    command '/bin/bash -e /etc/mariadb_grants \'' + \
       node['mariadb']['server_root_password'] + '\''
     only_if { File.exist?('/etc/mariadb_grants') }
+    sensitive true
     action :nothing
   end
-
   template '/etc/mariadb_grants' do
     sensitive true
     source 'mariadb_grants.erb'
     owner 'root'
     group 'root'
     mode '0600'
+    helpers MariaDB::Helper
     notifies :run, 'execute[install-grants]', :immediately
   end
 end
 
 # MariaDB Plugins
-include_recipe "#{cookbook_name}::plugins" if node['mariadb']['plugins_options']['auto_install']
+include_recipe "#{cookbook_name}::plugins" if \
+  node['mariadb']['plugins_options']['auto_install']

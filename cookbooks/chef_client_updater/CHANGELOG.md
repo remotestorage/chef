@@ -2,6 +2,40 @@
 
 This file is used to list changes made in each version of the chef_client_updater cookbook.
 
+## 3.0.4 (2017-08-17)
+
+- Fix gem install to actually install mixlib-install 3.3.4
+- Fix :latest resulting in chef installing on every run
+
+## 3.0.3 (2017-08-10)
+
+- Add accurate logging for the rubygems upgrade to reflect that we're actually upgrading to the latest release.
+- Require mixlib-install 3.3.4 to prevent failures on Windows nodes due to architecture detection failing within mixlib-install
+- Add debug logging for the desired version logic
+- Improve logging of the version we're upgrading to in situations where the user provides either :latest or a partial version like '12'. Show the version we're upgrading to instead of what the user passed
+
+## 3.0.2 (2017-08-08)
+
+- Improve logging to actually log when the upgrade occurs before we kill or exec the current chef-client run
+
+## 3.0.1 (2017-07-14)
+
+- adding check for gem.cmd on chef-client 13 windows
+
+## 3.0.0 (2017-07-14)
+
+### Breaking Changes
+
+- The default post install action for the resource has been switched from exec to kill. We believe that kill is the most likely default that users would expect as this allows a chef-client daemon running under a modern init system to cleanly upgrade. We highly recommend you check the readme and understand the exec and kill functions to determine which makes the most sense for how you run chef-client and how you execute the upgrade.
+- The prevent downgrade attribute for the default recipe has been changes from true to false as this is the default for the resource.
+
+### Other Changes
+
+- If chef-client is forked and the user specifies an 'exec' post install action we will now warn and then kill as exec will not worked in a forked run
+- Updated the windows task example in the readme to properly set the start time
+- Updated the minimum version of mixlib-install to download 3.3.1 which includes many fixes for windows clientsA
+- The resource now works around situations where mixlib-install may return an Array of versions
+
 ## 2.0.3 (2017-06-27)
 
 - Fix #31 detect centos platform correctly

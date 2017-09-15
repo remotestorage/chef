@@ -1,7 +1,7 @@
 MariaDB Cookbook
 ================
 
-[![Build Status](https://travis-ci.org/sinfomicien/mariadb.png)](https://travis-ci.org/sinfomicien/mariadb)
+[![Build Status](https://travis-ci.org/sinfomicien/mariadb.svg?branch=master)](https://travis-ci.org/sinfomicien/mariadb) [![Cookbook Version](https://img.shields.io/cookbook/v/mariadb.svg)](https://supermarket.chef.io/cookbooks/mariadb)
 
 Description
 -----------
@@ -23,8 +23,8 @@ Requirements
 
 #### operating system
 - `debian` - this cookbook is fully tested on debian
-- `ubuntu` - not fully tested on ubuntu, but should work
-- `centos` - not fully tested on centos, but should work
+- `ubuntu` - this cookbook is fully tested on ubuntu
+- `centos` - this cookbook is fully tested on centos
 
 Attributes
 ----------
@@ -46,7 +46,7 @@ Attributes
   <tr>
     <td><tt>['mariadb']['use_default_repository']</tt></td>
     <td>Boolean</td>
-    <td>Wether to install MariaDB default repository or not. If you don't have a local repo containing packages, put it to true</td>
+    <td>Whether to install MariaDB default repository or not. If you don't have a local repo containing packages, put it to true</td>
     <td><tt>false</tt></td>
   </tr>
   <tr>
@@ -58,19 +58,19 @@ Attributes
   <tr>
     <td><tt>['mariadb']['forbid_remote_root']</tt></td>
     <td>Boolean</td>
-    <td>Wether to activate root remote access</td>
+    <td>Whether to activate root remote access</td>
     <td><tt>true</tt></td>
   </tr>
   <tr>
     <td><tt>['mariadb']['allow_root_pass_change']</tt></td>
     <td>Boolean</td>
-    <td>Wether to allow the recipe to change root password after the first install</td>
+    <td>Whether to allow the recipe to change root password after the first install</td>
     <td><tt>false</tt></td>
   </tr>
   <tr>
     <td><tt>['mariadb']['client']['development_files']</tt></td>
     <td>Boolean</td>
-    <td>Wether to install development files in client recipe</td>
+    <td>Whether to install development files in client recipe</td>
     <td><tt>true</tt></td>
   </tr>
   <tr>
@@ -83,6 +83,12 @@ Attributes
     <td><tt>['mariadb']['install']['prefer_os_package']</tt></td>
     <td>Boolean</td>
     <td>Indicator for preferring use packages shipped by running os</td>
+    <td><tt>false</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['mariadb']['install']['prefer_scl_package']</tt></td>
+    <td>Boolean</td>
+    <td>Indicator for preferring packages from software collections repository</td>
     <td><tt>false</tt></td>
   </tr>
 </table>
@@ -98,6 +104,7 @@ List of availables recipes:
 - mariadb::server
 - mariadb::galera
 - mariadb::client
+- mariadb::devel
 
 Please be ware that by default, the root password is empty! If you want have changed it use the `node['mariadb']['server_root_password']` attribute to put a correct value. And by default the remote root access is not activated. Use `node['mariadb']['forbid_remote_root']` attribute to change it.
 
@@ -111,15 +118,18 @@ As wee need to have the same password for this user on the whole cluster nodes..
 
 #### mariadb::client
 
-By default this recipe install the client, and all needed packages to develop client application. If you do not want to install development files when installing client package,
+By default this recipe installs the client, and all needed packages to develop client application. If you do not want to install development files when installing client package,
 set the attribute `node['mariadb']['client']['development_files']` to false. 
+
+#### mariadb::devel
+
+By default this recipe installs all needed packages to develop client application.
 
 Providers
 ----------
 
 This recipe define 2  providers:
 - `Chef::Provider::Mariadb::Configuration` shortcut resource `mariadb_configuration`
-- `Chef::Provider::Mariadb::Replication` shortcut resource `mariadb_replication`
 
 #### mariadb_configuration
 
@@ -130,7 +140,8 @@ Example:
 ```ruby
 mariadb_configuration 'fake' do
   section 'mysqld'
-  option {foo: 'bar'}
+  option :innodb_buffer_pool_size => node['mysql']['innodb_buffer_pool_size'],
+    :innodb_flush_method => node['mysql']['innodb_flush_method']
 end
 ```
 will become the file fake.cnf in the include dir (depend on your platform), which contain:
@@ -145,7 +156,8 @@ Example:
 ```ruby
 mariadb_configuration 'fake' do
   section 'mysqld'
-  option {comment1: '# Here i am', foo: bar}
+  option :comment1 => '# Here i am',
+    :foo => bar
 end
 ```
 will become the file fake.cnf in the include dir (depend on your platform), which contain:
@@ -166,7 +178,7 @@ It have 4 actions:
 
 The resource name need to be 'default' if your don't want to use a named connection (multi source replication in MariaDB 10).
 
-So by default the provider try to use the local instance of mysql, with the current user and no password. If you want to change, you have to define `host`, `port`, `user` or `password`
+So by default the provider try to use the local instance of mysql, with the current root and password set in attribute node['mariadb']['server_root_password']. If you want to change, you have to define `host`, `port`, `user` or `password`
 
 ```ruby
 mariadb_replication 'default' do
@@ -190,6 +202,12 @@ mariadb_replication 'usefull_conn_name' do
   action :add
 end
 ```
+
+By default, resource doesn't change master if slave is running. If you want to let resource change slave settings for replication channel while slave is running use `change_master_while_running` property. When it's set to `true` slave settings will be changed
+if either one of `master_host`, `master_port`, `master_user`, `master_password` and `master_use_gtid` was changed.
+
+Changes of only `master_log_file` and/or `master_log_pos` don't affect server if slave is already configured.
+
 
 Contributing
 ------------

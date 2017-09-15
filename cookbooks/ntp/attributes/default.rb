@@ -89,7 +89,7 @@ case node['platform_family']
 when 'debian'
   default['ntp']['service'] = 'ntp'
   default['ntp']['apparmor_enabled'] = true if File.exist? '/etc/init.d/apparmor'
-when 'rhel', 'fedora'
+when 'rhel', 'fedora', 'amazon'
   default['ntp']['packages'] = %w(ntp ntpdate) if node['platform_version'].to_i >= 7
   default['ntp']['driftfile'] = "#{node['ntp']['varlibdir']}/drift"
 when 'windows'
@@ -98,7 +98,7 @@ when 'windows'
   default['ntp']['conffile'] = 'C:\\NTP\\etc\\ntp.conf'
   default['ntp']['conf_owner'] = 'Administrators'
   default['ntp']['conf_group'] = 'Administrators'
-  default['ntp']['package_url'] = 'https://www.meinbergglobal.com/download/ntp/windows/ntp-4.2.8p5-win32-setup.exe'
+  default['ntp']['package_url'] = 'https://www.meinbergglobal.com/download/ntp/windows/ntp-4.2.8p10-win32-setup.exe'
   default['ntp']['statistics'] = false
 when 'freebsd'
   default['ntp']['varlibdir'] = '/var/db'
@@ -133,6 +133,4 @@ when 'suse'
   default['ntp']['service'] = 'ntp' if node['platform_version'].to_f < 12
 end
 
-unless node['platform'] == 'windows'
-  default['ntp']['use_cmos'] = !node['virtualization'] || node['virtualization']['role'] != 'guest' ? true : false
-end
+default['ntp']['use_cmos'] = !node['virtualization'] || node['virtualization']['role'] != 'guest' ? true : false

@@ -30,6 +30,11 @@ host		= <%= node['mariadb']['client']['host'] %>
 [mysqld_safe]
 socket		= <%= node['mariadb']['mysqld_safe']['socket'] %>
 nice		= 0
+<% if node['mariadb']['mysqld_safe'].key?('options') -%>
+<%   node['mariadb']['mysqld_safe']['options'].each { |key, value| -%>
+<%= key %> = <%= value %>
+<%   } -%>
+<% end -%>
 
 [mysqld]
 #
@@ -49,6 +54,12 @@ lc_messages	= <%= node['mariadb']['mysqld']['lc_messages']     %>
 <% if node['mariadb']['mysqld']['skip_external_locking'] == 'true' -%>
 skip-external-locking
 <% end -%>
+<% if node['mariadb']['mysqld']['skip_log_bin'] == 'true' -%>
+skip-log-bin
+<% end -%>
+<% if node['mariadb']['mysqld']['skip_name_resolve'] == 'true' -%>
+skip-name-resolve
+<% end -%>
 #
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
@@ -59,6 +70,9 @@ bind-address		= <%= node['mariadb']['mysqld']['bind_address'] %>
 # * Fine Tuning
 #
 max_connections		= <%= node['mariadb']['mysqld']['max_connections']         %>
+<% unless node['mariadb']['mysqld']['max_statement_time'].empty? -%>
+max_statement_time  = <%= node['mariadb']['mysqld']['max_statement_time'] %>
+<% end -%>
 connect_timeout		= <%= node['mariadb']['mysqld']['connect_timeout']         %>
 wait_timeout		= <%= node['mariadb']['mysqld']['wait_timeout']            %>
 max_allowed_packet	= <%= node['mariadb']['mysqld']['max_allowed_packet']      %>
@@ -74,9 +88,7 @@ max_heap_table_size	= <%= node['mariadb']['mysqld']['max_heap_table_size']     %
 # the first time they are touched. On error, make copy and try a repair.
 myisam_recover          = <%= node['mariadb']['mysqld']['myisam_recover']  %>
 key_buffer_size		= <%= node['mariadb']['mysqld']['key_buffer_size'] %>
-<% if node['mariadb']['mysqld']['open_files_limit'].empty? -%>
-#open-files-limit	= 2000
-<% else -%>
+<% unless node['mariadb']['mysqld']['open_files_limit'].empty? -%>
 open-files-limit	= <%= node['mariadb']['mysqld']['open_files_limit'] %>
 <% end -%>
 table_open_cache	= <%= node['mariadb']['mysqld']['table_open_cache']        %>
@@ -102,20 +114,23 @@ query_cache_type                = <%= node['mariadb']['mysqld']['query_cache_typ
 # Both location gets rotated by the cronjob.
 # Be aware that this log type is a performance killer.
 # As of 5.1 you can enable the log at runtime!
-#general_log_file        = /var/log/mysql/mysql.log
-#general_log             = 1
+general_log_file        = <%= node['mariadb']['mysqld']['general_log_file'] %>
+general_log             = <%= node['mariadb']['mysqld']['general_log'] %>
 #
 # Error logging goes to syslog due to /etc/mysql/conf.d/mysqld_safe_syslog.cnf.
 #
 # we do want to know about network errors and such
-log_warnings		= 2
+log_warnings		= <%= node['mariadb']['mysqld']['log_warnings'] %>
 #
 # Enable the slow query log to see queries with especially long duration
 #slow_query_log[={0|1}]
-slow_query_log_file	= /var/log/mysql/mariadb-slow.log
-long_query_time = 10
-#log_slow_rate_limit	= 1000
-log_slow_verbosity	= query_plan
+slow_query_log = <%= node['mariadb']['mysqld']['slow_query_log'] %>
+slow_query_log_file	= <%= node['mariadb']['mysqld']['slow_query_log_file'] %>
+long_query_time = <%= node['mariadb']['mysqld']['long_query_time'] %>
+log_slow_rate_limit	= <%= node['mariadb']['mysqld']['log_slow_rate_limit'] %>
+log_slow_verbosity	= <%= node['mariadb']['mysqld']['log_slow_verbosity'] %>
+# Logging output type
+log_output = <%= node['mariadb']['mysqld']['log_output'] %>
 
 #log-queries-not-using-indexes
 #log_slow_admin_statements
@@ -166,7 +181,12 @@ default_storage_engine	= <%= node['mariadb']['mysqld']['default_storage_engine']
 <%   node['mariadb']['plugins_loading'].each { |plugin, loading| -%>
   <% plugin_load.push(loading) if node['mariadb']['plugins'][plugin] %>
 <%   } -%>
+<% unless plugin_load.empty? -%>
+#
+# * Plugins Options
+#
 plugin-load = <%= plugin_load.join(';') %>
+<% end -%>
 
 [mysqldump]
 <% if node['mariadb']['mysqldump']['quick'].empty? -%>
@@ -188,4 +208,3 @@ key_buffer		= <%= node['mariadb']['isamchk']['key_buffer'] %>
 #   The files must end with '.cnf', otherwise they'll be ignored.
 #
 !includedir <%= node['mariadb']['configuration']['includedir'] %>/
-

@@ -24,7 +24,7 @@ package 'postfix'
 package 'procmail' if node['postfix']['use_procmail']
 
 case node['platform_family']
-when 'rhel', 'fedora'
+when 'rhel', 'fedora', 'amazon'
   service 'sendmail' do
     action :nothing
   end
@@ -106,6 +106,25 @@ unless node['postfix']['smtp_generic_map_entries'].empty?
 
   unless node['postfix']['main'].key?('smtp_generic_maps')
     node.normal['postfix']['main']['smtp_generic_maps'] = "hash:#{node['postfix']['conf_dir']}/smtp_generic"
+  end
+end
+
+execute 'update-postfix-recipient_canonical' do
+  command "postmap #{node['postfix']['conf_dir']}/recipient_canonical"
+  action :nothing
+end
+
+unless node['postfix']['recipient_canonical_map_entries'].empty?
+  template "#{node['postfix']['conf_dir']}/recipient_canonical" do
+    owner 'root'
+    group node['root_group']
+    mode '0644'
+    notifies :run, 'execute[update-postfix-recipient_canonical]'
+    notifies :reload, 'service[postfix]'
+  end
+
+  unless node['postfix']['main'].key?('recipient_canonical_maps')
+    node.normal['postfix']['main']['recipient_canonical_maps'] = "hash:#{node['postfix']['conf_dir']}/recipient_canonical"
   end
 end
 
