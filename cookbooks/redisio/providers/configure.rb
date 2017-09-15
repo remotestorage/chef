@@ -51,8 +51,7 @@ def configure
     node_memory_kb = node['memory']['total']
     # On BSD platforms Ohai reports total memory as a Fixnum
     if node_memory_kb.is_a? String
-      node_memory_kb.slice! 'kB'
-      node_memory_kb = node_memory_kb.to_i
+      node_memory_kb = node_memory_kb.sub('kB', '').to_i
     end
 
     # Here we determine what the logfile is.  It has these possible states
@@ -294,7 +293,9 @@ def configure
           clusternodetimeout:         current['clusternodetimeout'],
           includes:                   current['includes'],
           minslavestowrite:           current['minslavestowrite'],
-          minslavesmaxlag:            current['minslavesmaxlag']
+          minslavesmaxlag:            current['minslavesmaxlag'],
+          repldisklesssync:           current['repldisklesssync'],
+          repldisklesssyncdelay:      current['repldisklesssyncdelay']
         )
         not_if { ::File.exist?("#{current['configdir']}/#{server_name}.conf.breadcrumb") }
       end
@@ -405,6 +406,6 @@ def configure
 end
 
 def load_current_resource
-  @current_resource = Chef::Resource::RedisioConfigure.new(new_resource.name)
+  @current_resource = Chef::Resource.resource_for_node(:redisio_configure, node).new(new_resource.name)
   @current_resource
 end
