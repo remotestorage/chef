@@ -10,10 +10,10 @@
 include_recipe 'apt'
 include_recipe 'ark'
 
-node.override['mediawiki']['version']         = "1.28.2"
+node.override['mediawiki']['version']         = "1.29.1"
 node.override['mediawiki']['webdir']          = "#{node["mediawiki"]["docroot_dir"]}/mediawiki-#{node['mediawiki']['version']}"
 node.override['mediawiki']['tarball']['name'] = "mediawiki-#{node['mediawiki']['version']}.tar.gz"
-node.override['mediawiki']['tarball']['url']  = "https://releases.wikimedia.org/mediawiki/1.28/#{node['mediawiki']['tarball']['name']}"
+node.override['mediawiki']['tarball']['url']  = "https://releases.wikimedia.org/mediawiki/1.29/#{node['mediawiki']['tarball']['name']}"
 node.override['mediawiki']['language_code']   = 'en'
 node.override['mediawiki']['server_name']     = 'wiki.remotestorage.io'
 node.override['mediawiki']['site_name']       = 'remotestorage Wiki'
