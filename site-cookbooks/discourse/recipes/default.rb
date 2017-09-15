@@ -7,8 +7,13 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe "remotestorage-redis"
+node.override['apt']['compile_time_update'] = true
+include_recipe "apt"
+node.override['build-essential']['compile_time'] = true
+include_recipe "build-essential"
 include_recipe "remotestorage-ruby"
+include_recipe "remotestorage-redis"
+
 node.override['postgresql']['enable_pgdg_apt'] = false
 node.override['postgresql']['contrib']['extensions'] = ['hstore', 'pg_trgm']
 include_recipe "postgresql::server"
