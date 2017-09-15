@@ -7,11 +7,12 @@
 # All rights reserved - Do Not Redistribute
 #
 
+node.override['apt']['compile_time_update'] = true
+include_recipe 'apt'
 include_recipe 'timezone_iii'
 include_recipe 'ntp'
 
 package 'mailutils'
-include_recipe 'apt'
 
 unless node.chef_environment == "development"
   # Update chef to the chosen version
