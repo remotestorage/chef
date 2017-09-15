@@ -14,7 +14,7 @@ DEPENDENCIES
   logrotate (~> 2.2.0)
   mediawiki
     git: https://github.com/67P/mediawiki-cookbook.git
-    revision: 925d54ca8cfbd9b17d55a753ca75d74fa5086eee
+    revision: d96a886e554e338e982e82c2502701d8e40fa55d
     ref: nginx
   mysql (~> 8.5.1)
   mysql2_chef_gem
