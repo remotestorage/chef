@@ -173,9 +173,9 @@ unless node.chef_environment == "development"
   node.override["backup"]["mysql"]["host"] = "localhost"
   node.override["backup"]["mysql"]["username"] = "root"
   node.override["backup"]["mysql"]["password"] = node["mediawiki"]["db"]["root_password"]
-  unless node["backup"]["mysql"]["databases"].include? 'mediawikidb'
+  unless node["backup"]["mysql"]["databases"].include? node['mediawiki']['db']['name']
     node.override["backup"]["mysql"]["databases"] =
-      node["backup"]["mysql"]["databases"].to_a << "mediawikidb"
+      node["backup"]["mysql"]["databases"].to_a << node['mediawiki']['db']['name']
   end
 
   include_recipe "backup"
