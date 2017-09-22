@@ -22,7 +22,7 @@ Vagrant.configure(2) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 80, host: 80
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -71,7 +71,7 @@ Vagrant.configure(2) do |config|
   # SHELL
 
   config.vm.provision :chef_zero do |chef|
-    chef.version                            = '12.21.3'
+    chef.version                            = '13.4.24'
     chef.cookbooks_path                     = ['./cookbooks', './site-cookbooks']
     chef.data_bags_path                     = './data_bags'
     chef.roles_path                         = './roles'
@@ -80,8 +80,7 @@ Vagrant.configure(2) do |config|
     chef.environments_path                  = './environments'
     chef.encrypted_data_bag_secret_key_path = '.chef/encrypted_data_bag_secret'
     chef.environment                        = 'development'
+    chef.add_role 'base'
     chef.add_role 'wiki'
-    chef.add_role 'discourse'
-
   end
 end
